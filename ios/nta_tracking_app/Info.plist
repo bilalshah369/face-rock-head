@@ -47,6 +47,13 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<key>NSCameraUsageDescription</key>
+<string>Camera access is required to scan QR codes</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>Location is required to log package scans</string>
+
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>Location is required to log package scans</string>
 	<false/>
 </dict>
 </plist>
