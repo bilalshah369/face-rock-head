@@ -11,7 +11,11 @@ import {Bar} from 'react-chartjs-2';
 import AdminLayout from './AdminLayout';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
-import {API_BASE} from '@env';
+import {API_BASE, REACT_APP_GOOGLE_MAPS_KEY} from '@env';
+
+import PackageRouteMap from '../Map/PackageRouteMap';
+import PackageJourneyMap from '../Map/PackageJourneyMap';
+import PackageQRTracking from '../Map/PackageQRTracking';
 const TOKEN_KEY = 'nta_token';
 
 export default function Dashboard() {
@@ -68,6 +72,49 @@ export default function Dashboard() {
           <Stat title="Dispatched" value={summary.dispatched} />
           <Stat title="Delivered" value={summary.delivered} />
           <Stat title="Returned" value={summary.returned} />
+        </div>
+        {/* Google Map */}
+        <div className="bg-white border rounded-md p-4">
+          <h3 className="font-medium mb-3 text-gray-700">Scan Locations</h3>
+          <div className="w-full border">
+            {/* Placeholder for Google Map */}
+            {/* <iframe
+              title="Scan Locations Map"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2525.047904694378!2d-0.127758!3d51.50735099999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x487604c6a8b6e8c7%3A0x5a8b6e8c7a8b6e8c7!2sLondon%2C%20UK!5e0!3m2!1sen!2sus!"
+              width="100%"
+              height="450"
+              frameBorder="0"
+              style={{border: 0}}
+              allowFullScreen
+              loading="lazy"></iframe> */}
+            <div className="p-6">
+              <h2 className="text-lg font-semibold mb-4">Package Route</h2>
+              <PackageQRTracking />
+              {/* <PackageJourneyMap
+                googleMapsApiKey={REACT_APP_GOOGLE_MAPS_KEY}
+                scanLocations={[
+                  {latitude: 28.6139, longitude: 77.209}, // Delhi
+                  {latitude: 26.9124, longitude: 75.7873}, // Jaipur
+                  {latitude: 23.0225, longitude: 72.5714}, // Ahmedabad
+                ]}
+                destinationLocation={{
+                  latitude: 19.076,
+                  longitude: 72.8777, // Mumbai
+                }}
+              /> */}
+              {/* <PackageRouteMap
+                googleMapsApiKey={REACT_APP_GOOGLE_MAPS_KEY}
+                scanLocation={{
+                  latitude: 28.6139, // Scan location (Delhi)
+                  longitude: 77.209,
+                }}
+                destinationLocation={{
+                  latitude: 19.076, // Destination (Mumbai)
+                  longitude: 72.8777,
+                }}
+              /> */}
+            </div>
+          </div>
         </div>
         {/* ===== MAIN CONTENT (TABLE + CHART) ===== */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
