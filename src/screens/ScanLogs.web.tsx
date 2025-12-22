@@ -190,7 +190,7 @@ export default function ScanLogs({navigation}: any) {
             {selectedTrackingId}
           </div>
         )}
-        <PackageQRTracking trackingId={selectedTrackingId} />
+
         {loading && <p>Loading scan logs...</p>}
 
         {!loading && selectedTrackingId && scanLogs.length === 0 && (
@@ -212,6 +212,7 @@ export default function ScanLogs({navigation}: any) {
         {design === 'zigzag' && (
           <ZigZagScanView trackingId={selectedTrackingId} />
         )}
+        <PackageQRTracking trackingId={selectedTrackingId} />
         {/* ================= TABLE ================= */}
         {!loading && scanLogs.length > 0 && (
           <div className="bg-white border rounded overflow-x-auto">

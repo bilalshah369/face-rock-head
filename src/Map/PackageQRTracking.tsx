@@ -24,11 +24,12 @@ const containerStyle = {
   height: '450px',
 };
 
-export default function PackageQRTracking(props: any) {
+export default function PackageQRTracking(props: {trackingId: string}) {
   const token = localStorage.getItem(TOKEN_KEY);
   const mapRef = useRef<google.maps.Map | null>(null);
+  let selectedTrackingId = props.trackingId; // Placeholder for tracking ID
+  //selectedTrackingId = localStorage.getItem('tracking_id') || '';
   debugger;
-  const selectedTrackingId = props.trackingId || '';
   const [journeys, setJourneys] = useState<DestinationJourney[]>([]);
   const [loadingData, setLoadingData] = useState(true);
 
@@ -42,27 +43,57 @@ export default function PackageQRTracking(props: any) {
       // 🔹 Replace with real API call
       //   const res = await fetch(`${API_BASE}/scans/getJourney`);
       //   const data = await res.json();
-      let dashboardRes: any;
       if (selectedTrackingId) {
-        dashboardRes = await fetch(
+        const res = await fetch(
           `${API_BASE}/scans/getJourney?trackingId=${selectedTrackingId}`,
           {
             headers: {Authorization: `Bearer ${token}`},
           },
         );
-        if (dashboardRes.success) setJourneys(dashboardRes.data);
+        const json = await res.json();
+        if (json.success) setJourneys(json.data);
+
         setLoadingData(false);
       } else {
-        dashboardRes = await fetch(`${API_BASE}/scans/getJourney`, {
+        const res = await fetch(`${API_BASE}/scans/getJourney`, {
           headers: {Authorization: `Bearer ${token}`},
         });
-        if (dashboardRes.success) setJourneys(dashboardRes.data);
+        const json = await res.json();
+        if (json.success) setJourneys(json.data);
+
         setLoadingData(false);
       }
     };
 
     loadJourneyData();
   }, [selectedTrackingId]);
+
+  //   useEffect(() => {
+  //     const loadJourneyData = async () => {
+  //       // 🔹 Replace with real API call
+  //       //   const res = await fetch(`${API_BASE}/scans/getJourney`);
+  //       //   const data = await res.json();
+  //       //let dashboardRes: any;
+  //       if (false) {
+  //         // dashboardRes = await fetch(
+  //         //   `${API_BASE}/scans/getJourney?trackingId=${'hhh'}`,
+  //         //   {
+  //         //     headers: {Authorization: `Bearer ${token}`},
+  //         //   },
+  //         // );
+  //         // if (dashboardRes.success) setJourneys(dashboardRes.data);
+  //         // setLoadingData(false);
+  //       } else {
+  //         const dashboardRes: any = await fetch(`${API_BASE}/scans/getJourney`, {
+  //           headers: {Authorization: `Bearer ${token}`},
+  //         });
+  //         if (dashboardRes.success) setJourneys(dashboardRes.data);
+  //         setLoadingData(false);
+  //       }
+  //     };
+
+  //     loadJourneyData();
+  //   }, []);
 
   /* ================= BUILD PATHS (ONCE) ================= */
   const journeyPaths = useMemo(() => {
