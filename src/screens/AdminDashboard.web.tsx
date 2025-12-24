@@ -54,6 +54,7 @@ export default function Dashboard() {
       if (res.status === 401 || res.status === 403) {
         localStorage.removeItem(TOKEN_KEY);
         //window.location.href = '/login';
+        localStorage.clear();
         nevigate('/login');
         throw new Error('Unauthorized');
       }
