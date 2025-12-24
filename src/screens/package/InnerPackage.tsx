@@ -258,11 +258,34 @@ export default function InnerPackage({
         </button>
       )}
 
-      <Input
+      {/* <Input
         label="Encrypted QR Payload"
         value={encryptedPayload}
         onChange={setEncryptedPayload}
-      />
+      /> */}
+      <div className="mt-2">
+        <label className="block text-xs font-medium mb-1 text-gray-700">
+          {'Encrypted QR Payload'}
+        </label>
+        <textarea
+          className="
+          w-full
+          border
+          rounded
+          px-2
+          py-1.5
+          text-sm
+          focus:outline-none
+          focus:ring-1
+          focus:ring-gray-400
+        "
+          placeholder="Encrypted QR Payload"
+          value={encryptedPayload}
+          onChange={e => {
+            setEncryptedPayload(e.target.value);
+          }}
+        />
+      </div>
 
       <label className="block text-sm font-medium mt-4">Outer Package</label>
       <select

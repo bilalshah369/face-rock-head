@@ -54,6 +54,7 @@ const ScannerScreen: React.FC<Props> = ({route, navigation}) => {
   const codeScanner = useCodeScanner({
     codeTypes: ['qr'],
     onCodeScanned: async codes => {
+      debugger;
       if (scanned || codes.length === 0) {
         return;
       }
