@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import AdminLayout from './AdminLayout';
+import AdminLayout from '../AdminLayout';
 
 import {API_BASE} from '@env';
 import {useNavigate} from 'react-router-dom';
@@ -30,7 +30,7 @@ const statusStyles: Record<string, string> = {
   RETURNED: 'bg-gray-100 text-gray-700',
   INACTIVE: 'bg-red-50 text-red-700',
 };
-export default function PackagesList({navigation}: any) {
+export default function GenerateQR_center({navigation}: any) {
   const navigate = useNavigate();
   const [centre, setCentre] = useState('');
   const [fromDate, setFromDate] = useState('');
@@ -41,19 +41,83 @@ export default function PackagesList({navigation}: any) {
   const [trackingId, setTrackingId] = useState('');
   const [status, setStatus] = useState('');
   const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
-
+  const [centres, setCentres] = useState<any[]>([]);
   //paging
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
-
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [qrStatus, setQrStatus] = useState<'loading' | 'success' | 'error'>(
+    'loading',
+  );
+  const [qrMessage, setQrMessage] = useState('');
   const token = localStorage.getItem(TOKEN_KEY);
+  const fetchCentres = async () => {
+    const res = await fetch(`${API_BASE}/masters/centres`, {
+      headers: {Authorization: `Bearer ${token}`},
+    });
+    const json = await res.json();
+    if (json.success) setCentres(json.data);
+  };
+  const handleBulkGenerateQR = async () => {
+    const isFilterApplied =
+      !!centre || !!fromDate || !!toDate || !!trackingId || !!status;
 
+    // 🚫 Guard: At least one filter required
+    if (!isFilterApplied) {
+      setShowQRModal(true);
+      setQrStatus('error');
+      setQrMessage(
+        'Please apply at least one filter before generating QR codes.',
+      );
+      return;
+    }
+    setShowQRModal(true);
+    setQrStatus('loading');
+    setQrMessage('Generating QR codes for selected packages...');
+
+    try {
+      const payload = {
+        centre,
+        from_date: fromDate,
+        to_date: toDate,
+        tracking_id: trackingId || null,
+        status: status || null,
+      };
+
+      const res = await fetch(`${API_BASE}/qrcode/bulk-generate-qr`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const json = await res.json();
+
+      if (!json.success) {
+        throw new Error(json.message || 'QR generation failed');
+      }
+
+      setQrStatus('success');
+      setQrMessage(
+        `QR codes generated successfully for ${json.data.generated_count} packages`,
+      );
+
+      // 🔁 Refresh list
+      fetchPackages(page, limit);
+    } catch (err: any) {
+      setQrStatus('error');
+      setQrMessage(err.message || 'Something went wrong');
+    }
+  };
   useEffect(() => {
     if (!token) {
       navigation.navigate('Login');
       return;
     }
+    fetchCentres();
     fetchPackages(1, 10);
   }, []);
   useEffect(() => {
@@ -124,7 +188,8 @@ export default function PackagesList({navigation}: any) {
     for (let i = start; i <= end; i++) pages.push(i);
     return pages;
   };
-
+  const isFilterApplied =
+    !!centre || !!fromDate || !!toDate || !!trackingId || !!status;
   return (
     <AdminLayout>
       <div className="bg-gray-50 min-h-screen p-4 text-sm space-y-4">
@@ -145,55 +210,35 @@ export default function PackagesList({navigation}: any) {
 
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">
-                Centre
+                Exam Centre
               </label>
-              <input
+              {/* <input
                 className="border rounded px-2 py-1.5 w-40 text-xs"
                 placeholder="Delhi"
                 value={centre}
                 onChange={e => setCentre(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                Status
-              </label>
+              /> */}
               <select
-                className="border rounded px-2 py-1.5 w-36 text-xs"
-                value={status}
-                onChange={e => setStatus(e.target.value)}>
-                <option value="">All</option>
-                <option value="CREATED">Created</option>
-                <option value="PENDING">Pending</option>
-                <option value="DISPATCHED">Dispatched</option>
-                <option value="DELIVERED">Delivered</option>
-                <option value="RETURNED">Returned</option>
+                value={centre}
+                onChange={e => setCentre(e.target.value)}
+                className="
+    w-full
+    border
+    rounded
+    px-2
+    py-1.5
+    text-sm
+    focus:outline-none
+    focus:ring-1
+    focus:ring-gray-400
+  ">
+                <option value="">Select Centre</option>
+                {centres.map(c => (
+                  <option key={c.centre_id} value={c.centre_id}>
+                    {c.centre_code} — {c.centre_name}
+                  </option>
+                ))}
               </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                From
-              </label>
-              <input
-                type="date"
-                className="border rounded px-2 py-1.5 text-xs"
-                value={fromDate}
-                onChange={e => setFromDate(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                To
-              </label>
-              <input
-                type="date"
-                className="border rounded px-2 py-1.5 text-xs"
-                value={toDate}
-                onChange={e => setToDate(e.target.value)}
-              />
             </div>
 
             <button
@@ -203,6 +248,29 @@ export default function PackagesList({navigation}: any) {
               className="bg-gray-800 text-white px-4 py-1.5 rounded text-xs hover:bg-gray-900">
               Search
             </button>
+            {/* <button
+              onClick={handleBulkGenerateQR}
+              disabled={loading || packages.length === 0}
+              className="bg-indigo-600 text-white px-4 py-1.5 rounded text-xs hover:bg-indigo-700 disabled:opacity-50">
+              Generate QR (Filtered)
+            </button> */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleBulkGenerateQR}
+                disabled={loading || packages.length === 0}
+                className="bg-indigo-600 text-white px-4 py-1.5 rounded text-xs hover:bg-indigo-700 disabled:opacity-50">
+                Generate QR (Filtered)
+              </button>
+
+              {/* Filter indicator (display only) */}
+              {isFilterApplied && (
+                <span
+                  title="Filters applied"
+                  className="text-gray-400 cursor-not-allowed">
+                  <IconFilter />
+                </span>
+              )}
+            </div>
           </div>
 
           {/* RIGHT CONTROLS */}
@@ -283,7 +351,7 @@ export default function PackagesList({navigation}: any) {
 
                       <td className="px-3 py-2 border">
                         <div className="flex gap-2 flex-wrap">
-                          <ActionButton
+                          {/* <ActionButton
                             variant="edit"
                             icon={<IconEdit />}
                             label="Edit"
@@ -294,7 +362,7 @@ export default function PackagesList({navigation}: any) {
                               );
                               navigate(`/packages/create`);
                             }}
-                          />
+                          /> */}
 
                           <ActionButton
                             variant="qr"
@@ -430,77 +498,215 @@ export default function PackagesList({navigation}: any) {
         )}
         {/* CARD VIEW */}
         {viewMode === 'card' && (
-          <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-4">
-            {packages.map(pkg => (
-              <div
-                key={pkg.id}
-                className="bg-white rounded-md border p-3 hover:shadow-sm transition">
-                {/* Header */}
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <p className="text-xs text-gray-500">Tracking ID</p>
-                    <p className="text-sm font-semibold text-gray-800">
-                      {pkg.tracking_id}
-                    </p>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-4">
+              {packages.map(pkg => (
+                <div
+                  key={pkg.id}
+                  className="bg-white rounded-md border p-3 hover:shadow-sm transition">
+                  {/* Header */}
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <p className="text-xs text-gray-500">Tracking ID</p>
+                      <p className="text-sm font-semibold text-gray-800">
+                        {pkg.tracking_id}
+                      </p>
+                    </div>
+
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[11px] font-medium ${
+                        statusStyles[pkg.status] || 'bg-gray-100 text-gray-700'
+                      }`}>
+                      {pkg.status}
+                    </span>
                   </div>
 
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-[11px] font-medium ${
-                      statusStyles[pkg.status] || 'bg-gray-100 text-gray-700'
-                    }`}>
-                    {pkg.status}
-                  </span>
-                </div>
+                  {/* DETAILS — THIS IS WHERE YOUR LINES GO */}
+                  <div className="mb-2">
+                    <div className="space-y-0.5 text-xs text-gray-600">
+                      <p>
+                        <span className="font-medium">Centre:</span>{' '}
+                        {pkg.centre_code}/{pkg.centre_name}
+                      </p>
+                      <p>
+                        <span className="font-medium">Created:</span>{' '}
+                        {new Date(pkg.created_on).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
 
-                {/* DETAILS — THIS IS WHERE YOUR LINES GO */}
-                <div className="mb-2">
-                  <div className="space-y-0.5 text-xs text-gray-600">
-                    <p>
-                      <span className="font-medium">Centre:</span>{' '}
-                      {pkg.centre_code}/{pkg.centre_name}
-                    </p>
-                    <p>
-                      <span className="font-medium">Created:</span>{' '}
-                      {new Date(pkg.created_on).toLocaleString()}
-                    </p>
+                  {/* ACTIONS */}
+                  <div className="flex gap-1.5 flex-wrap">
+                    <ActionButton
+                      variant="edit"
+                      icon={<IconEdit />}
+                      label="Edit"
+                      onClick={() => {
+                        localStorage.setItem('tracking_id', pkg.tracking_id);
+                        navigate(`/packages/create`);
+                      }}
+                    />
+                    <ActionButton
+                      variant="qr"
+                      icon={<IconQR />}
+                      label="Generate QR"
+                      disabled={pkg.status !== 'CREATED'}
+                    />
+                    <ActionButton
+                      variant="print"
+                      icon={<IconPrint />}
+                      label="Print"
+                      disabled={!pkg.qr_type}
+                    />
+                    <ActionButton
+                      variant="inactive"
+                      icon={<IconInactive />}
+                      label="Inactive"
+                      disabled={pkg.status === 'INACTIVE'}
+                    />
                   </div>
                 </div>
+              ))}
+            </div>
+            <div className="flex items-center justify-between text-xs text-gray-600">
+              {/* left: info */}
+              <span>
+                Showing {total === 0 ? 0 : (page - 1) * limit + 1}–
+                {Math.min(page * limit, total)} of {total}
+              </span>
 
-                {/* ACTIONS */}
-                <div className="flex gap-1.5 flex-wrap">
-                  <ActionButton
-                    variant="edit"
-                    icon={<IconEdit />}
-                    label="Edit"
-                    onClick={() => {
-                      localStorage.setItem('tracking_id', pkg.tracking_id);
-                      navigate(`/packages/create`);
-                    }}
-                  />
-                  <ActionButton
-                    variant="qr"
-                    icon={<IconQR />}
-                    label="Generate QR"
-                    disabled={pkg.status !== 'CREATED'}
-                  />
-                  <ActionButton
-                    variant="print"
-                    icon={<IconPrint />}
-                    label="Print"
-                    disabled={!pkg.qr_type}
-                  />
-                  <ActionButton
-                    variant="inactive"
-                    icon={<IconInactive />}
-                    label="Inactive"
-                    disabled={pkg.status === 'INACTIVE'}
-                  />
+              {/* right: page size + buttons */}
+              <div className="flex items-center gap-3">
+                <select
+                  className="border rounded px-1 py-0.5 text-xs"
+                  value={limit}
+                  onChange={e => {
+                    setPage(1);
+                    setLimit(Number(e.target.value));
+                  }}>
+                  {[10, 20, 50, 100].map(size => (
+                    <option key={size} value={size}>
+                      {size} / page
+                    </option>
+                  ))}
+                </select>
+
+                <div className="inline-flex items-center gap-1">
+                  {/* First */}
+                  <button
+                    type="button"
+                    className="px-2 py-1 border rounded disabled:opacity-50"
+                    disabled={page === 1 || loading}
+                    onClick={() => setPage(1)}>
+                    «
+                  </button>
+
+                  {/* Prev */}
+                  <button
+                    type="button"
+                    className="px-2 py-1 border rounded disabled:opacity-50"
+                    disabled={page === 1 || loading}
+                    onClick={() => setPage(p => Math.max(1, p - 1))}>
+                    Prev
+                  </button>
+
+                  {/* Numbered buttons */}
+                  {getPageNumbers().map(p => (
+                    <button
+                      key={p}
+                      type="button"
+                      className={`px-2 py-1 border rounded ${
+                        p === page ? 'bg-blue-500 text-white' : 'bg-white'
+                      }`}
+                      disabled={loading}
+                      onClick={() => setPage(p)}>
+                      {p}
+                    </button>
+                  ))}
+
+                  {/* Next */}
+                  <button
+                    type="button"
+                    className="px-2 py-1 border rounded disabled:opacity-50"
+                    disabled={
+                      page === totalPages || totalPages === 0 || loading
+                    }
+                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}>
+                    Next
+                  </button>
+
+                  {/* Last */}
+                  <button
+                    type="button"
+                    className="px-2 py-1 border rounded disabled:opacity-50"
+                    disabled={
+                      page === totalPages || totalPages === 0 || loading
+                    }
+                    onClick={() => setPage(totalPages)}>
+                    »
+                  </button>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          </>
         )}
       </div>
+      {showQRModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-[360px] p-6 text-center animate-scaleIn">
+            {/* LOADING */}
+            {qrStatus === 'loading' && (
+              <>
+                <div className="mx-auto mb-4 h-12 w-12 rounded-full border-4 border-indigo-200 border-t-indigo-600 animate-spin" />
+                <h3 className="text-sm font-semibold text-gray-800">
+                  Generating QR Codes
+                </h3>
+                <p className="text-xs text-gray-500 mt-1">
+                  Please wait, this may take a moment…
+                </p>
+              </>
+            )}
+
+            {/* SUCCESS */}
+            {qrStatus === 'success' && (
+              <>
+                <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-green-100 flex items-center justify-center animate-pop">
+                  ✅
+                </div>
+                <h3 className="text-sm font-semibold text-green-700">
+                  QR Generation Complete
+                </h3>
+                <p className="text-xs text-gray-600 mt-1">{qrMessage}</p>
+
+                <button
+                  onClick={() => setShowQRModal(false)}
+                  className="mt-4 px-4 py-1.5 text-xs bg-green-600 text-white rounded hover:bg-green-700">
+                  Done
+                </button>
+              </>
+            )}
+
+            {/* ERROR */}
+            {qrStatus === 'error' && (
+              <>
+                <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-red-100 flex items-center justify-center">
+                  ❌
+                </div>
+                <h3 className="text-sm font-semibold text-red-700">
+                  QR Generation Failed
+                </h3>
+                <p className="text-xs text-gray-600 mt-1">{qrMessage}</p>
+
+                <button
+                  onClick={() => setShowQRModal(false)}
+                  className="mt-4 px-4 py-1.5 text-xs bg-gray-700 text-white rounded">
+                  Close
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }
@@ -603,7 +809,16 @@ const IconPrint = () => (
     <path d="M6 17h12" stroke="currentColor" strokeWidth="2" />
   </svg>
 );
-
+const IconFilter = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+    <path
+      d="M3 5h18l-7 8v6l-4-2v-4L3 5z"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 const IconInactive = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
     <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />

@@ -14,6 +14,9 @@ import CreatePackageNew from './src/screens/package/CreatePackageNew.web';
 import CitiesMaster from './src/screens/CitiesMaster.web';
 import CentresMaster from './src/screens/CentresMaster.web';
 import GenerateQR from './src/screens/GenerateQR.web';
+import OuterPackageExcelImport from './src/screens/workspace/OuterPackageExcelImport';
+import GenerateQR_center from './src/screens/package/GenerateQR_center.web';
+import PrintQRPDF_center from './src/screens/package/PrintQRPDF_center.web';
 const TOKEN_KEY = 'nta_token';
 const ProtectedRoute = ({children}: any) => {
   const token = localStorage.getItem(TOKEN_KEY);
@@ -52,7 +55,22 @@ export default function App() {
           </ProtectedRoute>
         }
       />
-
+      <Route
+        path="/packages/qr-list"
+        element={
+          <ProtectedRoute>
+            <GenerateQR_center />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/packages/print-qr-pdf"
+        element={
+          <ProtectedRoute>
+            <PrintQRPDF_center />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/packages/track"
         element={
@@ -121,6 +139,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <GenerateQR />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/ImportPackages"
+        element={
+          <ProtectedRoute>
+            <OuterPackageExcelImport />
           </ProtectedRoute>
         }
       />

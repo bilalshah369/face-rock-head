@@ -9,6 +9,8 @@ const routeToMenuMap: Record<string, {menu: string; sub?: string}> = {
   '/packages/list': {menu: 'Packages', sub: 'PKG_QR'},
   '/packages/track': {menu: 'Packages', sub: 'PKG_TRACK'},
   '/packages/generate-qr': {menu: 'Packages', sub: 'PKG_QR'},
+  '/packages/qr-list': {menu: 'Packages', sub: 'QR_GENERATE'},
+  '/packages/print-qr-pdf': {menu: 'Packages', sub: 'print-qr-pdf'},
   '/packages/scan-logs': {menu: 'Scans', sub: 'SCAN_LOGS'},
 
   '/masters/states': {menu: 'Masters', sub: 'STATE'},
@@ -141,6 +143,16 @@ const AdminLayout: React.FC<Props> = ({children}) => {
                 label: 'Create Package QR',
                 route: '/packages/create',
               },
+              {
+                key: 'QR_GENERATE',
+                label: 'Generate QR',
+                route: '/packages/qr-list',
+              },
+              {
+                key: 'QR_PRINT_PDF',
+                label: 'Print QR PDF',
+                route: '/packages/print-qr-pdf',
+              },
               {key: 'PKG_QR', label: 'Print QR', route: '/packages/list'},
               {
                 key: 'PKG_TRACK',
@@ -214,6 +226,20 @@ const AdminLayout: React.FC<Props> = ({children}) => {
                 key: 'AUDIT_SCAN',
                 label: 'Scan Audits',
                 route: '/audit?type=SCAN',
+              },
+            ])}
+          </NavDropdown>
+          {/* Import Export */}
+          <NavDropdown
+            label="Import Export"
+            active={activeMenu === 'Import'}
+            open={openSubMenu === 'Import'}
+            onToggle={() => toggleSubMenu('Import')}>
+            {renderSubMenu('Import', [
+              {
+                key: 'IMPORT_OUTER',
+                label: 'Import Packages',
+                route: '/ImportPackages',
               },
             ])}
           </NavDropdown>
