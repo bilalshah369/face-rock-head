@@ -189,7 +189,7 @@ export default function PrintCenterQRPDF_print({
               className="w-full h-[600px] bg-white"
               title="QR PDF"
               style={{
-                backgroundColor: '#ffffff', // 🔥 forces light background
+                backgroundColor: '#ffffff', //  forces light background
               }}
             />
           </div>

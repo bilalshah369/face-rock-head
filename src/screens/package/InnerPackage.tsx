@@ -69,7 +69,7 @@ export default function InnerPackage({
 
   /* ---------------- API ---------------- */
   const fetchOuterPackages = async () => {
-    const res = await fetch(`${API_BASE}/packages?page=1&limit=100`, {
+    const res = await fetch(`${API_BASE}/packages?page=1&limit=10000`, {
       headers: {Authorization: `Bearer ${token}`},
     });
     const json = await res.json();
@@ -77,7 +77,7 @@ export default function InnerPackage({
     debugger;
     if (storedTrackingId) {
       loadPackage(storedTrackingId);
-      setEditMode(true);
+      //setEditMode(true);
       //   const OuterPackage = json.data.find(
       //     (p: OuterPackageItem) => p.outer_tracking_id === storedTrackingId,
       //   );
@@ -229,7 +229,7 @@ export default function InnerPackage({
         setExamDate(toLocalDate(inner.exam_date));
         setCentreId(inner.centre_id);
         setOuterPackageId(inner.outer_package_id);
-
+        setEditMode(true);
         //fetchOuterQR(inner.tracking_id);
         //GetInnerQRResult(inner.tracking_id);
         //generateQR(inner.tracking_id);
