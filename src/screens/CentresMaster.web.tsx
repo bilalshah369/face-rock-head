@@ -31,6 +31,17 @@ export default function CentresMaster({navigation}: any) {
   const [showForm, setShowForm] = useState(false);
   const [editingCentre, setEditingCentre] = useState<CentreItem | null>(null);
 
+  type RouteCoordinate = {
+    latitude: string;
+    longitude: string;
+  };
+
+  const [showRouteModal, setShowRouteModal] = useState(false);
+  const [routeCentre, setRouteCentre] = useState<CentreItem | null>(null);
+  const [coordinates, setCoordinates] = useState<RouteCoordinate[]>([
+    {latitude: '', longitude: ''},
+  ]);
+
   const [form, setForm] = useState({
     centre_code: '',
     centre_name: '',
@@ -196,7 +207,7 @@ export default function CentresMaster({navigation}: any) {
                 </td>
                 <td className="p-2">{centre.latitude}</td>
                 <td className="p-2">{centre.longitude}</td>
-                <td className="p-2 space-x-3">
+                <td className="p-2 space-x-3 flex">
                   <button
                     onClick={() => {
                       setEditingCentre(centre);
@@ -217,6 +228,15 @@ export default function CentresMaster({navigation}: any) {
                     onClick={() => deleteCentre(centre.centre_id)}
                     className="text-red-600 hover:underline">
                     Delete
+                  </button>
+                  <button
+                    onClick={() => {
+                      setRouteCentre(centre);
+                      setCoordinates([{latitude: '', longitude: ''}]);
+                      setShowRouteModal(true);
+                    }}
+                    className="text-green-600 hover:underline">
+                    Assign Package Route
                   </button>
                 </td>
               </tr>
@@ -260,6 +280,74 @@ export default function CentresMaster({navigation}: any) {
             onClick={saveCentre}
             className="w-full bg-gray-800 text-white py-1.5 text-sm rounded mt-3">
             Save
+          </button>
+        </Modal>
+      )}
+      {showRouteModal && routeCentre && (
+        <Modal
+          title="Define Package Route Coordinates"
+          onClose={() => setShowRouteModal(false)}>
+          <div className="space-y-2">
+            {coordinates.map((coord, index) => (
+              <div key={index} className="flex gap-2">
+                <input
+                  placeholder="Latitude"
+                  className="w-1/2 border rounded px-2 py-1.5 text-sm"
+                  value={coord.latitude}
+                  onChange={e => {
+                    const updated = [...coordinates];
+                    updated[index].latitude = e.target.value;
+                    setCoordinates(updated);
+                  }}
+                />
+
+                <input
+                  placeholder="Longitude"
+                  className="w-1/2 border rounded px-2 py-1.5 text-sm"
+                  value={coord.longitude}
+                  onChange={e => {
+                    const updated = [...coordinates];
+                    updated[index].longitude = e.target.value;
+                    setCoordinates(updated);
+                  }}
+                />
+
+                {coordinates.length > 1 && (
+                  <button
+                    onClick={() =>
+                      setCoordinates(coordinates.filter((_, i) => i !== index))
+                    }
+                    className="text-red-600 text-xs">
+                    ✕
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <button
+            onClick={() =>
+              setCoordinates([...coordinates, {latitude: '', longitude: ''}])
+            }
+            className="mt-3 text-sm text-blue-600 hover:underline">
+            + Add Coordinate
+          </button>
+
+          <button
+            onClick={() => {
+              const payload = {
+                centre_id: routeCentre.centre_id,
+                route_points: coordinates.map(c => ({
+                  latitude: Number(c.latitude),
+                  longitude: Number(c.longitude),
+                })),
+              };
+
+              console.log(payload); // replace with API call
+              setShowRouteModal(false);
+            }}
+            className="w-full mt-4 bg-gray-800 text-white py-1.5 text-sm rounded">
+            Save Route
           </button>
         </Modal>
       )}
