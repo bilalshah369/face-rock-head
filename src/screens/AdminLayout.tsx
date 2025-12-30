@@ -140,17 +140,17 @@ const AdminLayout: React.FC<Props> = ({children}) => {
             {renderSubMenu('Packages', [
               {
                 key: 'PKG_CREATE',
-                label: 'Create Package QR',
+                label: 'Create Package',
                 route: '/packages/create',
               },
               {
                 key: 'QR_GENERATE',
-                label: 'Generate QR',
+                label: 'Generate QR Code',
                 route: '/packages/qr-list',
               },
               {
                 key: 'QR_PRINT_PDF',
-                label: 'Print QR PDF',
+                label: 'Print QR Code PDF ',
                 route: '/packages/print-qr-pdf',
               },
               {key: 'PKG_QR', label: 'Print QR', route: '/packages/list'},
@@ -283,9 +283,9 @@ const NavDropdown = ({label, active, open, onToggle, children}: any) => (
 const SubMenuItem = ({label, onMouseDown, active}: any) => (
   <div
     onMouseDown={onMouseDown}
-    className={`px-4 py-2 text-sm cursor-pointer select-none ${
-      active ? 'bg-gray-200 font-medium' : 'hover:bg-gray-100'
-    }`}>
+    className={`px-4 py-2 text-sm cursor-pointer select-none
+      border-b border-gray-200 last:border-b-0
+      ${active ? 'bg-gray-200 font-medium' : 'hover:bg-gray-100'}`}>
     {label}
   </div>
 );

@@ -9,6 +9,7 @@ import {
 } from '@react-google-maps/api';
 
 type ScanPoint = {
+  tracking_id: string;
   latitude: number;
   longitude: number;
   scan_status: string;
@@ -165,7 +166,7 @@ export default function PackageQRTracking(props: {trackingId: string}) {
             alt="Destination"
             style={{width: 18, height: 18, marginRight: 6}}
           />
-          <span>Destination Centre</span>
+          <span>Exam Centre</span>
         </div>
 
         <div style={{display: 'flex', alignItems: 'center'}}>
@@ -267,6 +268,9 @@ export default function PackageQRTracking(props: {trackingId: string}) {
 
                         {/* Body */}
                         <div style={{fontSize: 12, color: '#374151'}}>
+                          <div style={{marginBottom: 4}}>
+                            <strong>Tracking ID:</strong> {scan.tracking_id}
+                          </div>
                           <div style={{marginBottom: 4}}>
                             📍 <strong>Latitude:</strong> {scan.latitude}
                           </div>
