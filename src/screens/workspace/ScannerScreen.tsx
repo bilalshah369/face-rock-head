@@ -58,7 +58,7 @@ const ScannerScreen: React.FC<Props> = ({route, navigation}) => {
       if (scanned || codes.length === 0) {
         return;
       }
-
+      setScanned(true);
       const encryptedValue = codes[0]?.value;
       if (!encryptedValue) return;
 
@@ -66,7 +66,7 @@ const ScannerScreen: React.FC<Props> = ({route, navigation}) => {
 
       if (!decryptedValue) {
         Alert.alert('Invalid QR', 'Unable to decrypt QR code');
-        setScanned(false);
+        //setScanned(false);
         return;
       }
       let payload: any;
@@ -74,7 +74,7 @@ const ScannerScreen: React.FC<Props> = ({route, navigation}) => {
         payload = JSON.parse(decryptedValue);
       } catch {
         Alert.alert('Invalid QR', 'QR payload is corrupted');
-        setScanned(false);
+        //setScanned(false);
         return;
       }
       const {
@@ -88,7 +88,7 @@ const ScannerScreen: React.FC<Props> = ({route, navigation}) => {
       //  Validate required fields
       if (!tracking_id || !qr_type) {
         Alert.alert('Invalid QR', 'Missing QR data');
-        setScanned(false);
+        //setScanned(false);
         return;
       }
 
@@ -98,10 +98,10 @@ const ScannerScreen: React.FC<Props> = ({route, navigation}) => {
           'Wrong QR',
           `You are scanning a ${type} package but this QR is ${qr_type}`,
         );
-        setScanned(false);
+        //setScanned(false);
         return;
       }
-      setScanned(true);
+      //setScanned(true);
       Alert.alert(
         'Scan Successful',
         `Tracking ID: ${tracking_id}\nType: ${qr_type}\nCenter Code: ${

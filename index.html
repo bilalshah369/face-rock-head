@@ -43,6 +43,32 @@
       .animate-pop {
         animation: pop 0.3s ease-out;
       }
+      @keyframes shake-x {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        20% {
+          transform: translateX(-3px);
+        }
+        40% {
+          transform: translateX(3px);
+        }
+        60% {
+          transform: translateX(-2px);
+        }
+        80% {
+          transform: translateX(2px);
+        }
+      }
+
+      .animate-shake-infinite {
+        animation: shake-x 0.6s ease-in-out infinite;
+      }
+
+      .animate-shake {
+        animation: shake-x 0.35s ease-in-out;
+      }
     </style>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>

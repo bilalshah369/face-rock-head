@@ -44,8 +44,16 @@ const AppNavigator = ({
         component={DashboardScreen}
         options={{headerShown: false}}
       />
-      <Stack.Screen name="Scanner" component={ScannerScreen} />
-      <Stack.Screen name="ScanHistoryScreen" component={ScanHistoryScreen} />
+      <Stack.Screen
+        name="Scanner"
+        component={ScannerScreen}
+        options={{title: 'Scan QR'}}
+      />
+      <Stack.Screen
+        name="ScanHistoryScreen"
+        component={ScanHistoryScreen}
+        options={{title: 'Scan History'}}
+      />
     </Stack.Navigator>
   );
 };

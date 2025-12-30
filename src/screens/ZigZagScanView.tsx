@@ -14,6 +14,7 @@ export interface ScanLog {
   device_id: string;
   latitude: string;
   longitude: string;
+  scan_status: string;
 }
 
 interface ZigZagScanViewProps {
@@ -103,81 +104,102 @@ export default function ZigZagScanView({trackingId}: ZigZagScanViewProps) {
                   }`}>
                   {/* CONNECTOR DOT */}
                   <div
-                    className={`absolute left-1/2 top-6 transform -translate-x-1/2 w-4 h-4 rounded-full border-4 ${
-                      log.scan_mode === 'OFFLINE'
-                        ? 'bg-yellow-500 border-yellow-200'
-                        : 'bg-green-600 border-green-200'
-                    }`}
+                    className={`absolute left-1/2 top-5 transform -translate-x-1/2 w-3 h-3 rounded-full border-2
+    ${
+      log.scan_status === 'ON_ROUTE'
+        ? 'bg-green-600 border-green-200'
+        : 'bg-red-600 border-red-200 animate-shake'
+    }
+  `}
                   />
 
                   {/* CARD */}
+                  {/* CARD */}
                   <div
-                    className={`w-full md:w-[45%] border rounded-md p-4 text-sm ${
-                      isLatest
-                        ? 'bg-green-50 border-green-300'
-                        : 'bg-white border-gray-200'
-                    }`}>
-                    {/* TOP ROW */}
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex gap-2 items-center">
-                        <span className="text-xs font-semibold text-gray-500">
-                          Step {scanLogs.length - index}
+                    className={`w-full md:w-[42%] rounded-lg border px-4 py-3 text-xs shadow-sm transition-all
+    ${
+      log.scan_status === 'ON_ROUTE'
+        ? 'bg-green-50 border-green-300'
+        : 'bg-red-50 border-red-300 animate-shake'
+    }
+    ${isLatest ? 'ring-2 ring-offset-1 ring-green-400' : ''}
+  `}>
+                    {/* HEADER ROW */}
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-gray-600">
+                          #{scanLogs.length - index}
                         </span>
 
                         <span
-                          className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                            log.qr_type === 'OUTER'
-                              ? 'bg-blue-100 text-blue-700'
-                              : 'bg-purple-100 text-purple-700'
-                          }`}>
+                          className={`px-2 py-0.5 rounded text-[10px] font-semibold
+          ${
+            log.qr_type === 'OUTER'
+              ? 'bg-blue-100 text-blue-700'
+              : 'bg-purple-100 text-purple-700'
+          }
+        `}>
                           {log.qr_type}
                         </span>
 
                         <span
-                          className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                            log.scan_mode === 'OFFLINE'
-                              ? 'bg-yellow-100 text-yellow-700'
-                              : 'bg-green-100 text-green-700'
-                          }`}>
-                          {log.scan_mode}
+                          className={`px-2 py-0.5 rounded text-[10px] font-semibold
+          ${
+            log.scan_status === 'ON_ROUTE'
+              ? 'bg-green-600 text-white'
+              : 'bg-red-600 text-white'
+          }
+        `}>
+                          {log.scan_status}
                         </span>
                       </div>
 
                       {isLatest && (
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-600 text-white font-semibold">
+                        <span className="text-[10px] px-2 py-0.5 rounded bg-black text-white font-semibold">
                           CURRENT
                         </span>
                       )}
                     </div>
 
-                    {/* DETAILS */}
-                    <div className="grid grid-cols-2 gap-3 text-xs">
+                    {/* META GRID */}
+                    <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
                       <div>
-                        <div className="text-gray-500">Scanned By</div>
+                        <span className="text-gray-500">By</span>
                         <div className="font-medium">
                           {log.full_name ?? log.scanned_by}
                         </div>
                       </div>
 
                       <div>
-                        <div className="text-gray-500">Device</div>
+                        <span className="text-gray-500">Device</span>
                         <div>{log.device_id}</div>
                       </div>
 
                       <div>
-                        <div className="text-gray-500">Latitude</div>
+                        <span className="text-gray-500">Lat</span>
                         <div>{log.latitude}</div>
                       </div>
 
                       <div>
-                        <div className="text-gray-500">Longitude</div>
+                        <span className="text-gray-500">Lng</span>
                         <div>{log.longitude}</div>
                       </div>
                     </div>
 
-                    {/* TIME */}
-                    <div className="mt-3 text-xs text-gray-500">
-                      {new Date(log.scan_datetime).toLocaleString()}
+                    {/* FOOTER */}
+                    <div className="mt-2 flex justify-between text-[10px] text-gray-600">
+                      <span>
+                        {new Date(log.scan_datetime).toLocaleString()}
+                      </span>
+
+                      <span
+                        className={`font-semibold ${
+                          log.scan_mode === 'OFFLINE'
+                            ? 'text-yellow-700'
+                            : 'text-green-700'
+                        }`}>
+                        {log.scan_mode}
+                      </span>
                     </div>
                   </div>
                 </div>

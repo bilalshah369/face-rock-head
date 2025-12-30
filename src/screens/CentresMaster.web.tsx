@@ -172,7 +172,7 @@ export default function CentresMaster({navigation}: any) {
       <div className="bg-white p-3 rounded border mb-3 max-w-md">
         <label className="block text-xs font-medium mb-1">City</label>
         <select
-          className="border rounded px-2 py-1.5 w-full text-sm"
+          className="border rounded px-2 py-1.5 text-xs w-full"
           value={selectedCity}
           onChange={e => setSelectedCity(e.target.value)}>
           <option value="">Select City</option>
@@ -185,59 +185,91 @@ export default function CentresMaster({navigation}: any) {
       </div>
 
       {/* CENTRES TABLE */}
-      <div className="bg-white rounded border overflow-x-auto max-w-5xl">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-100">
+      <div className="bg-white rounded border overflow-x-auto">
+        <table className="min-w-full border-collapse">
+          <thead className="bg-gray-100 text-gray-600 text-xs">
             <tr>
               <th className="p-2 text-left">Centre Code</th>
               <th className="p-2 text-left">Centre Name</th>
               <th className="p-2 text-left">City Name</th>
               <th className="p-2 text-left">Latitude</th>
               <th className="p-2 text-left">Longitude</th>
-              <th className="p-2 text-left w-40">Actions</th>
+              <th className="p-2 text-left">Actions</th>
             </tr>
           </thead>
           <tbody>
             {centres.map(centre => (
-              <tr key={centre.centre_id} className="border-t">
-                <td className="p-2 font-medium">{centre.centre_code}</td>
-                <td className="p-2">{centre.centre_name}</td>
-                <td className="p-2">
+              <tr
+                key={centre.centre_id}
+                className="hover:bg-gray-200 transition">
+                <td className="px-2 py-1 text-xs border">
+                  {centre.centre_code}
+                </td>
+                <td className="px-2 py-1 text-xs border">
+                  {centre.centre_name}
+                </td>
+                <td className="px-2 py-1 text-xs border">
                   {cities?.find(c => c.city_id === centre.city_id)?.city_name}
                 </td>
-                <td className="p-2">{centre.latitude}</td>
-                <td className="p-2">{centre.longitude}</td>
-                <td className="p-2 space-x-3 flex">
-                  <button
-                    onClick={() => {
-                      setEditingCentre(centre);
-                      setForm({
-                        centre_code: centre.centre_code,
-                        centre_name: centre.centre_name,
-                        city_id: selectedCity,
-                        latitude: String(centre.latitude),
-                        longitude: String(centre.longitude),
-                      });
-                      setShowForm(true);
-                    }}
-                    className="text-blue-600 hover:underline">
-                    Edit
-                  </button>
+                <td className="px-2 py-1 text-xs border">{centre.latitude}</td>
+                <td className="px-2 py-1 text-xs border">{centre.longitude}</td>
+                <td className="px-2 py-1 text-xs border">
+                  <div className="flex gap-2 flex-wrap">
+                    <CentreActionButton
+                      label="Edit"
+                      icon={<EditIcon />}
+                      onClick={() => {
+                        setEditingCentre(centre);
+                        setForm({
+                          centre_code: centre.centre_code,
+                          centre_name: centre.centre_name,
+                          city_id: selectedCity,
+                          latitude: String(centre.latitude),
+                          longitude: String(centre.longitude),
+                        });
+                        setShowForm(true);
+                      }}
+                    />
 
-                  <button
-                    onClick={() => deleteCentre(centre.centre_id)}
-                    className="text-red-600 hover:underline">
-                    Delete
-                  </button>
-                  <button
-                    onClick={() => {
-                      setRouteCentre(centre);
-                      setCoordinates([{latitude: '', longitude: ''}]);
-                      setShowRouteModal(true);
-                    }}
-                    className="text-green-600 hover:underline">
-                    Assign Package Route
-                  </button>
+                    <CentreActionButton
+                      label="Assign Route"
+                      icon={<RouteIcon />}
+                      variant="success"
+                      onClick={async () => {
+                        setRouteCentre(centre);
+                        setShowRouteModal(true);
+
+                        // Load existing route
+                        const res = await fetch(
+                          `${API_BASE}/masters/centres/centre-package-route/${centre.centre_id}`,
+                          {
+                            headers: {Authorization: `Bearer ${token}`},
+                          },
+                        );
+
+                        const json = await res.json();
+
+                        if (json.success && json.data.length > 0) {
+                          setCoordinates(
+                            json.data.map((p: any) => ({
+                              latitude: String(p.latitude),
+                              longitude: String(p.longitude),
+                            })),
+                          );
+                        } else {
+                          // No route exists → fresh
+                          setCoordinates([{latitude: '', longitude: ''}]);
+                        }
+                      }}
+                    />
+
+                    <CentreActionButton
+                      label="Delete"
+                      icon={<DeleteIcon />}
+                      variant="danger"
+                      onClick={() => deleteCentre(centre.centre_id)}
+                    />
+                  </div>
                 </td>
               </tr>
             ))}
@@ -285,14 +317,37 @@ export default function CentresMaster({navigation}: any) {
       )}
       {showRouteModal && routeCentre && (
         <Modal
-          title="Define Package Route Coordinates"
+          title="Package Route Coordinates"
           onClose={() => setShowRouteModal(false)}>
-          <div className="space-y-2">
+          {/* Header Info */}
+          <div className="mb-3">
+            <p className="text-xs text-gray-500">
+              Define the route points for centre:
+              <span className="font-medium text-gray-700 ml-1">
+                {routeCentre.centre_name}
+              </span>
+            </p>
+          </div>
+
+          {/* Table Header */}
+          <div className="grid grid-cols-[40px_1fr_1fr_32px] gap-2 text-[11px] font-medium text-gray-600 border-b pb-1 mb-2">
+            <div>#</div>
+            <div>Latitude</div>
+            <div>Longitude</div>
+            <div />
+          </div>
+
+          {/* Coordinate Rows */}
+          <div className="space-y-1 max-h-64 overflow-y-auto">
             {coordinates.map((coord, index) => (
-              <div key={index} className="flex gap-2">
+              <div
+                key={index}
+                className="grid grid-cols-[40px_1fr_1fr_32px] gap-2 items-center">
+                <div className="text-xs text-gray-500">{index + 1}</div>
+
                 <input
                   placeholder="Latitude"
-                  className="w-1/2 border rounded px-2 py-1.5 text-sm"
+                  className="border rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-gray-400"
                   value={coord.latitude}
                   onChange={e => {
                     const updated = [...coordinates];
@@ -303,7 +358,7 @@ export default function CentresMaster({navigation}: any) {
 
                 <input
                   placeholder="Longitude"
-                  className="w-1/2 border rounded px-2 py-1.5 text-sm"
+                  className="border rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-gray-400"
                   value={coord.longitude}
                   onChange={e => {
                     const updated = [...coordinates];
@@ -312,48 +367,123 @@ export default function CentresMaster({navigation}: any) {
                   }}
                 />
 
-                {coordinates.length > 1 && (
+                {coordinates.length > 1 ? (
                   <button
                     onClick={() =>
                       setCoordinates(coordinates.filter((_, i) => i !== index))
                     }
-                    className="text-red-600 text-xs">
+                    className="text-red-500 hover:text-red-700 text-xs"
+                    title="Remove">
                     ✕
                   </button>
+                ) : (
+                  <span />
                 )}
               </div>
             ))}
           </div>
 
+          {/* Add Row */}
           <button
             onClick={() =>
               setCoordinates([...coordinates, {latitude: '', longitude: ''}])
             }
-            className="mt-3 text-sm text-blue-600 hover:underline">
-            + Add Coordinate
+            className="mt-2 text-xs text-blue-600 hover:underline">
+            + Add another coordinate
           </button>
 
-          <button
-            onClick={() => {
-              const payload = {
-                centre_id: routeCentre.centre_id,
-                route_points: coordinates.map(c => ({
-                  latitude: Number(c.latitude),
-                  longitude: Number(c.longitude),
-                })),
-              };
+          {/* Footer */}
+          <div className="flex justify-end gap-2 mt-4 border-t pt-3">
+            <button
+              onClick={() => setShowRouteModal(false)}
+              className="px-3 py-1 text-xs border rounded text-gray-600 hover:bg-gray-100">
+              Cancel
+            </button>
 
-              console.log(payload); // replace with API call
-              setShowRouteModal(false);
-            }}
-            className="w-full mt-4 bg-gray-800 text-white py-1.5 text-sm rounded">
-            Save Route
-          </button>
+            <button
+              onClick={async () => {
+                await fetch(
+                  `${API_BASE}/masters/centres/centre-package-route`,
+                  {
+                    method: 'POST',
+                    headers: {
+                      Authorization: `Bearer ${token}`,
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                      centre_id: routeCentre.centre_id,
+                      route_points: coordinates.map(c => ({
+                        latitude: Number(c.latitude),
+                        longitude: Number(c.longitude),
+                      })),
+                    }),
+                  },
+                );
+
+                setShowRouteModal(false);
+              }}
+              className="px-4 py-1 text-xs bg-gray-800 text-white rounded hover:bg-gray-900">
+              Save Route
+            </button>
+          </div>
         </Modal>
       )}
     </AdminLayout>
   );
 }
+const EditIcon = () => (
+  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M12 3l1 1-8 8H4v-1l8-8z" />
+  </svg>
+);
+
+const RouteIcon = () => (
+  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M3 6h10M3 10h10" />
+  </svg>
+);
+
+const DeleteIcon = () => (
+  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M3 6h10M5 6v8M9 6v8" />
+  </svg>
+);
+type CentreActionButtonProps = {
+  label: string;
+  icon: React.ReactNode;
+  variant?: 'primary' | 'success' | 'danger' | 'neutral';
+  onClick?: () => void;
+  disabled?: boolean;
+};
+
+const CentreActionButton = ({
+  label,
+  icon,
+  variant = 'primary',
+  onClick,
+  disabled,
+}: CentreActionButtonProps) => {
+  const styles = {
+    primary: 'border-blue-500 text-blue-600 hover:bg-blue-50',
+    success: 'border-green-500 text-green-600 hover:bg-green-50',
+    danger: 'border-red-500 text-red-600 hover:bg-red-50',
+    neutral: 'border-gray-400 text-gray-500',
+  };
+
+  return (
+    <button
+      disabled={disabled}
+      onClick={onClick}
+      className={`
+        flex items-center gap-1 px-2 py-1 text-xs rounded border transition
+        ${styles[variant]}
+        ${disabled ? 'opacity-60 cursor-not-allowed' : ''}
+      `}>
+      {icon}
+      {label}
+    </button>
+  );
+};
 
 /* ================= REUSABLE UI ================= */
 
@@ -386,7 +516,7 @@ const Modal = ({
   onClose: () => void;
 }) => (
   <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-    <div className="bg-white rounded p-4 w-full max-w-sm">
+    <div className="bg-white rounded p-4 w-full max-w-3xl">
       <div className="flex justify-between items-center mb-3">
         <h2 className="text-sm font-semibold">{title}</h2>
         <button onClick={onClose} className="text-gray-500">
