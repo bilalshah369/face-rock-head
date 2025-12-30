@@ -204,10 +204,22 @@ export default function Dashboard() {
   );
 }
 
-/* ===== CARD ===== */
 function Stat({title, value}: {title: string; value: string}) {
   return (
-    <div className="bg-white border rounded-md p-4 text-center">
+    <div
+      className="
+        bg-white
+        border
+        rounded-md
+        p-4
+        text-center
+        shadow-lg
+        transition
+        duration-200
+        ease-in-out
+        hover:shadow-lg
+        hover:-translate-y-0.5
+      ">
       <div className="text-sm text-gray-500">{title}</div>
       <div className="text-2xl font-semibold text-gray-800">{value}</div>
     </div>

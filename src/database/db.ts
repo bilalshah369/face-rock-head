@@ -11,6 +11,7 @@ export const getDB = async () => {
 export const insertScanLog = async (scan: {
   tracking_id: string;
   qr_type: 'OUTER' | 'INNER';
+  centre_id: number;
   scanned_by?: number;
   scanned_phone?: string;
   scan_datetime: string;
@@ -40,9 +41,9 @@ export const insertScanLog = async (scan: {
         device_id,
         remarks,
         created_by,
-        synced
+        synced,centre_id
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0,?)
       `,
       [
         scan.tracking_id,
@@ -56,6 +57,7 @@ export const insertScanLog = async (scan: {
         scan.device_id ?? null,
         scan.remarks ?? null,
         scan.created_by ?? null,
+        scan.centre_id ?? null,
       ],
     );
 

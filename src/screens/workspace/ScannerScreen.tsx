@@ -83,6 +83,7 @@ const ScannerScreen: React.FC<Props> = ({route, navigation}) => {
         centre_code,
         centre_name,
         encrypted_qr_payload,
+        centre_id,
       } = payload;
 
       //  Validate required fields
@@ -131,6 +132,7 @@ const ScannerScreen: React.FC<Props> = ({route, navigation}) => {
       const insertedId = await insertScanLog({
         tracking_id,
         qr_type,
+        centre_id: centre_id,
         scanned_by: userId ? parseInt(userId, 10) : undefined, // later from logged-in user
         scanned_phone: user?.phone_number, // optional
         scan_datetime: new Date().toISOString(),
@@ -155,7 +157,7 @@ const ScannerScreen: React.FC<Props> = ({route, navigation}) => {
             qr_type: qr_type,
             scanned_by: userId ? parseInt(userId, 10) : undefined,
             scanned_phone: user?.phone_number,
-
+            centre_id: centre_id,
             scan_datetime: new Date().toISOString(),
             latitude: latitude,
             longitude: longitude,

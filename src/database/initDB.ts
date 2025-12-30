@@ -10,7 +10,7 @@ export const initDB = async () => {
 
     tracking_id TEXT NOT NULL,
     qr_type TEXT CHECK (qr_type IN ('OUTER', 'INNER')),
-
+centre_id integer,
     scanned_by INTEGER,
     scanned_phone TEXT,
 

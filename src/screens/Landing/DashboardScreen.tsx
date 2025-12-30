@@ -10,16 +10,19 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import AppHeader from '../Layout/AppHeader';
+import {useAppContext} from '../../context/AppContext';
 
 const DashboardScreen = ({navigation}: {navigation: any}) => {
   const [isOnline, setIsOnline] = useState<boolean>(true);
   const [showMenu, setShowMenu] = useState(false);
+  const {setIsAutoSync, isAutoSync} = useAppContext();
   const [showProfile, setShowProfile] = useState(false);
-  const [autoSync, setAutoSync] = useState<boolean>(true);
+  // const [autoSync, setAutoSync] = useState<boolean>(true);
   const toggleAutoSync = async () => {
-    const newValue = !autoSync;
-    setAutoSync(newValue);
-    await AsyncStorage.setItem('AUTO_SYNC', String(newValue));
+    // const newValue = !autoSync;
+    // setAutoSync(newValue);
+    setIsAutoSync(!isAutoSync);
+    // await AsyncStorage.setItem('AUTO_SYNC', String(newValue));
   };
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
@@ -28,15 +31,16 @@ const DashboardScreen = ({navigation}: {navigation: any}) => {
 
     return () => unsubscribe();
   }, []);
-  useEffect(() => {
-    const loadAutoSync = async () => {
-      const value = await AsyncStorage.getItem('AUTO_SYNC');
-      if (value !== null) {
-        setAutoSync(value === 'true');
-      }
-    };
-    loadAutoSync();
-  }, []);
+  // useEffect(() => {
+  //   const loadAutoSync = async () => {
+  //     // const value = await AsyncStorage.getItem('AUTO_SYNC');
+  //     // if (value !== null) {
+  //     //   setAutoSync(value === 'true');
+  //     // }
+  //     setAutoSync(isAutoSync);
+  //   };
+  //   loadAutoSync();
+  // }, []);
   const logout = async () => {
     await AsyncStorage.clear();
     navigation.replace('Login');
@@ -149,9 +153,9 @@ const DashboardScreen = ({navigation}: {navigation: any}) => {
             <View
               style={[
                 styles.syncIndicator,
-                {backgroundColor: autoSync ? '#16A34A' : '#9CA3AF'},
+                {backgroundColor: isAutoSync ? '#16A34A' : '#9CA3AF'},
               ]}>
-              <Text style={styles.syncText}>{autoSync ? 'ON' : 'OFF'}</Text>
+              <Text style={styles.syncText}>{isAutoSync ? 'ON' : 'OFF'}</Text>
             </View>
           </TouchableOpacity>
 

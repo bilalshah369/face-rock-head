@@ -5,11 +5,15 @@ import {
   Marker,
   Polyline,
   useJsApiLoader,
+  InfoWindow,
 } from '@react-google-maps/api';
 
 type ScanPoint = {
   latitude: number;
   longitude: number;
+  scan_status: string;
+  scan_datetime: string;
+  centre_name: string;
 };
 
 type DestinationJourney = {
@@ -32,7 +36,11 @@ export default function PackageQRTracking(props: {trackingId: string}) {
   debugger;
   const [journeys, setJourneys] = useState<DestinationJourney[]>([]);
   const [loadingData, setLoadingData] = useState(true);
-
+  const [activeMarker, setActiveMarker] = useState<{
+    journeyId: string;
+    type: 'SCAN' | 'DESTINATION';
+    index?: number;
+  } | null>(null);
   const {isLoaded} = useJsApiLoader({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_KEY!,
   });
@@ -118,7 +126,61 @@ export default function PackageQRTracking(props: {trackingId: string}) {
   }
 
   return (
-    <div className="rounded-lg overflow-hidden border">
+    <div className="relative rounded-lg overflow-hidden border">
+      <div
+        style={{
+          position: 'absolute',
+          top: 12,
+          left: 12,
+          zIndex: 10,
+          background: '#ffffff',
+          borderRadius: 8,
+          padding: '8px 10px',
+          fontSize: 12,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+          minWidth: 140,
+        }}>
+        <div style={{fontWeight: 600, marginBottom: 6}}>Legend</div>
+
+        <div style={{display: 'flex', alignItems: 'center', marginBottom: 4}}>
+          <img
+            src="https://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+            alt="Scan"
+            style={{width: 18, height: 18, marginRight: 6}}
+          />
+          <span>Scan Point (ON_ROUTE)</span>
+        </div>
+        <div style={{display: 'flex', alignItems: 'center', marginBottom: 4}}>
+          <img
+            src="https://maps.google.com/mapfiles/ms/icons/red-dot.png"
+            alt="Scan"
+            style={{width: 18, height: 18, marginRight: 6}}
+          />
+          <span>Scan Point (OFF_ROUTE)</span>
+        </div>
+
+        <div style={{display: 'flex', alignItems: 'center', marginBottom: 4}}>
+          <img
+            src="https://maps.google.com/mapfiles/ms/icons/green-dot.png"
+            alt="Destination"
+            style={{width: 18, height: 18, marginRight: 6}}
+          />
+          <span>Destination Centre</span>
+        </div>
+
+        <div style={{display: 'flex', alignItems: 'center'}}>
+          <div
+            style={{
+              width: 18,
+              height: 4,
+              background: '#2563eb',
+              marginRight: 6,
+              borderRadius: 2,
+            }}
+          />
+          <span>Route Path</span>
+        </div>
+      </div>
       <GoogleMap
         mapContainerStyle={containerStyle}
         onLoad={map => {
@@ -131,29 +193,222 @@ export default function PackageQRTracking(props: {trackingId: string}) {
           map.fitBounds(bounds);
         }}
         options={{
-          fullscreenControl: false,
           streetViewControl: false,
           mapTypeControl: false,
+          fullscreenControl: true, // ✅ enable full screen
+          zoomControl: true,
         }}>
         {journeys.map((journey, jIndex) => (
           <React.Fragment key={journey.destinationId}>
             {/* Scan markers */}
-            {journey.scans.map((scan, i) => (
-              <Marker
-                key={`${journey.destinationId}-scan-${i}`}
-                position={{lat: scan.latitude, lng: scan.longitude}}
-                label={`${i + 1}`}
-              />
-            ))}
+            {journey.scans.map((scan, i) => {
+              const isActive =
+                activeMarker?.journeyId === journey.destinationId &&
+                activeMarker?.type === 'SCAN' &&
+                activeMarker?.index === i;
+
+              return (
+                <React.Fragment key={`${journey.destinationId}-scan-${i}`}>
+                  <Marker
+                    position={{lat: scan.latitude, lng: scan.longitude}}
+                    icon={{
+                      url:
+                        scan.scan_status === 'ON_ROUTE'
+                          ? 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png'
+                          : 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+                    }}
+                    onClick={() =>
+                      setActiveMarker({
+                        journeyId: journey.destinationId,
+                        type: 'SCAN',
+                        index: i,
+                      })
+                    }
+                  />
+
+                  {isActive && (
+                    <InfoWindow
+                      position={{lat: scan.latitude, lng: scan.longitude}}
+                      onCloseClick={() => setActiveMarker(null)}>
+                      <div
+                        style={{
+                          minWidth: 200,
+                          fontFamily:
+                            'system-ui, -apple-system, BlinkMacSystemFont',
+                        }}>
+                        {/* Header */}
+                        <div
+                          style={{
+                            fontSize: 13,
+                            fontWeight: 600,
+                            marginBottom: 6,
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                          }}>
+                          <span>Scan #{i + 1}</span>
+                          <span
+                            style={{
+                              padding: '2px 6px',
+                              fontSize: 11,
+                              borderRadius: 6,
+                              background:
+                                scan.scan_status === 'ON_ROUTE'
+                                  ? '#dcfce7'
+                                  : '#fee2e2',
+                              color:
+                                scan.scan_status === 'ON_ROUTE'
+                                  ? '#166534'
+                                  : '#991b1b',
+                            }}>
+                            {scan.scan_status}
+                          </span>
+                        </div>
+
+                        {/* Body */}
+                        <div style={{fontSize: 12, color: '#374151'}}>
+                          <div style={{marginBottom: 4}}>
+                            📍 <strong>Latitude:</strong> {scan.latitude}
+                          </div>
+                          <div style={{marginBottom: 4}}>
+                            📍 <strong>Longitude:</strong> {scan.longitude}
+                          </div>
+                          <div style={{marginBottom: 4}}>
+                            🕒 <strong>Date:</strong>{' '}
+                            {new Date(scan.scan_datetime).toLocaleString()}
+                          </div>
+                        </div>
+                        {/* Divider */}
+                        <div
+                          style={{
+                            margin: '8px 0',
+                            borderTop: '1px solid #e5e7eb',
+                          }}
+                        />
+
+                        {/* Bottom Close Button */}
+                        <button
+                          onClick={() => setActiveMarker(null)}
+                          style={{
+                            width: '100%',
+                            padding: '6px 0',
+                            fontSize: 12,
+                            borderRadius: 6,
+                            border: 'none',
+                            background: '#2563eb',
+                            color: '#fff',
+                            cursor: 'pointer',
+                          }}>
+                          Close
+                        </button>
+                      </div>
+                    </InfoWindow>
+                  )}
+                </React.Fragment>
+              );
+            })}
 
             {/* Destination marker */}
-            <Marker
-              position={{
-                lat: journey.destinationLocation.latitude,
-                lng: journey.destinationLocation.longitude,
-              }}
-              label="D"
-            />
+            {(() => {
+              const isActive =
+                activeMarker?.journeyId === journey.destinationId &&
+                activeMarker?.type === 'DESTINATION';
+
+              return (
+                <>
+                  <Marker
+                    position={{
+                      lat: journey.destinationLocation.latitude,
+                      lng: journey.destinationLocation.longitude,
+                    }}
+                    icon={{
+                      url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
+                    }}
+                    onClick={() =>
+                      setActiveMarker({
+                        journeyId: journey.destinationId,
+                        type: 'DESTINATION',
+                      })
+                    }
+                  />
+
+                  {isActive && (
+                    <InfoWindow
+                      position={{
+                        lat: journey.destinationLocation.latitude,
+                        lng: journey.destinationLocation.longitude,
+                      }}>
+                      <div
+                        style={{
+                          minWidth: 220,
+                          fontFamily:
+                            'system-ui, -apple-system, BlinkMacSystemFont',
+                        }}>
+                        {/* Title */}
+                        <div
+                          style={{
+                            fontSize: 13,
+                            fontWeight: 600,
+                            marginBottom: 6,
+                          }}>
+                          📍 Destination
+                        </div>
+
+                        {/* Center Name */}
+                        <div
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 500,
+                            color: '#1f2937',
+                            marginBottom: 6,
+                          }}>
+                          {journey.destinationLocation.centre_name ?? 'Center'}
+                        </div>
+
+                        {/* Coordinates */}
+                        <div
+                          style={{
+                            fontSize: 12,
+                            color: '#374151',
+                            lineHeight: 1.4,
+                          }}>
+                          <div>
+                            Latitude: {journey.destinationLocation.latitude}
+                          </div>
+                          <div>
+                            Longitude: {journey.destinationLocation.longitude}
+                          </div>
+                        </div>
+
+                        {/* Divider */}
+                        <div
+                          style={{
+                            margin: '8px 0',
+                            borderTop: '1px solid #e5e7eb',
+                          }}
+                        />
+
+                        {/* Bottom Close Button */}
+                        <button
+                          onClick={() => setActiveMarker(null)}
+                          style={{
+                            width: '100%',
+                            padding: '6px 0',
+                            fontSize: 12,
+                            borderRadius: 6,
+                            border: 'none',
+                            background: '#16a34a',
+                            color: '#fff',
+                            cursor: 'pointer',
+                          }}>
+                          Close
+                        </button>
+                      </div>
+                    </InfoWindow>
+                  )}
+                </>
+              );
+            })()}
 
             {/* Route polyline */}
             <Polyline

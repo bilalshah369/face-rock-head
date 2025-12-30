@@ -7,6 +7,7 @@ import {useAutoSync} from './src/hooks/useAutoSync';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {RootStackParamList} from './src/navigation/types';
 import {ActivityIndicator, View} from 'react-native';
+import {AppProvider} from './src/context/AppContext';
 
 export default function App() {
   const [initialRoute, setInitialRoute] = useState<
@@ -40,8 +41,10 @@ export default function App() {
     );
   }
   return (
-    <NavigationContainer>
-      <AppNavigator initialRoute={initialRoute} />
-    </NavigationContainer>
+    <AppProvider>
+      <NavigationContainer>
+        <AppNavigator initialRoute={initialRoute} />
+      </NavigationContainer>
+    </AppProvider>
   );
 }
