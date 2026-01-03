@@ -34,38 +34,32 @@ class LocalFaceMatchModule(
      * JS sends ONLY base64 data (already signed)
      */
     @ReactMethod
-    fun startLocalFaceMatch(
-        signedPhotoBase64: String,
-        signedDocumentBase64: String,
-        promise: Promise
-    ) {
-        val activity = currentActivity
-        if (activity == null) {
-            promise.reject("NO_ACTIVITY", "Current activity is null")
-            return
-        }
+fun startLocalFaceMatch(
+    mockCmsBase64: String,
+    promise: Promise
+) {
+    val activity = currentActivity ?: run {
+        promise.reject("NO_ACTIVITY", "No activity")
+        return
+    }
 
-        try {
-            // 1️⃣ Build final UIDAI XML USING YOUR JAVA CLASSES
-            val xmlRequest = UidaiFaceMatchService.buildSignedFaceMatchXml(
-                signedPhotoBase64,
-                signedDocumentBase64
+    try {
+        val xmlRequest =
+            UidaiFaceMatchService.buildSignedFaceMatchXml(
+                mockCmsBase64
             )
 
-            // 2️⃣ Create UIDAI intent
-            val intent = Intent(UIDAI_ACTION)
-            intent.putExtra(REQUEST_KEY, xmlRequest)
+        val intent = Intent(UIDAI_ACTION)
+        intent.putExtra("request", xmlRequest)
 
-            // 3️⃣ Store promise for response
-            this.promise = promise
+        this.promise = promise
+        activity.startActivityForResult(intent, REQUEST_CODE)
 
-            // 4️⃣ Launch UIDAI RD Service
-            activity.startActivityForResult(intent, REQUEST_CODE)
-
-        } catch (e: Exception) {
-            promise.reject("XML_BUILD_ERROR", e.message)
-        }
+    } catch (e: Exception) {
+        promise.reject("FACE_MATCH_ERROR", e.message)
     }
+}
+
 
     /**
      * UIDAI RD Service returns result here

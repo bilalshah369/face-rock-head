@@ -1,24 +1,13 @@
 import {NativeModules} from 'react-native';
 
-const {LocalFaceMatch} = NativeModules;
+const {PhotoSigner, LocalFaceMatch} = NativeModules;
 
-/**
- * Starts UIDAI Local Face Match
- *
- * @param signedPhotoBase64      Signed photo (Base64)
- * @param signedDocumentBase64   Signed document (Base64)
- * @returns XML response from UIDAI RD Service
- */
-export function startLocalFaceMatch(
-  signedPhotoBase64: string,
-  signedDocumentBase64: string,
-): Promise<string> {
-  if (!LocalFaceMatch) {
-    throw new Error('LocalFaceMatch native module not linked');
-  }
+export async function verifyFace(photoBase64: string) {
+  const clean = photoBase64.replace(/^data:image\/\w+;base64,/, '');
 
-  return LocalFaceMatch.startLocalFaceMatch(
-    signedPhotoBase64,
-    signedDocumentBase64,
-  );
+  // 🔐 Native signing
+  const cmsSignedBase64 = await PhotoSigner.signPhoto(clean);
+
+  // 🔐 RD Service call
+  return await LocalFaceMatch.startLocalFaceMatch(cmsSignedBase64);
 }

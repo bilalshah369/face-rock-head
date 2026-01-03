@@ -18,8 +18,8 @@ import {useAppContext} from '../../context/AppContext';
 import {callHeadlessFaceMatch} from '../../native/faceMatch';
 import {buildFaceMatchXml} from '../../utils/buildFaceMatchXml';
 import {parseFaceMatchResponse} from '../../utils/parseFaceMatchResponse';
-import {startLocalFaceMatch} from '../../native/localFaceMatch';
-
+import {verifyFace} from '../../native/localFaceMatch';
+import {launchImageLibrary} from 'react-native-image-picker';
 const DashboardScreen = ({navigation}: {navigation: any}) => {
   const [isOnline, setIsOnline] = useState<boolean>(true);
   const [showMenu, setShowMenu] = useState(false);
@@ -51,6 +51,36 @@ const DashboardScreen = ({navigation}: {navigation: any}) => {
   const logout = async () => {
     await AsyncStorage.clear();
     navigation.replace('Login');
+  };
+  const pickPhotoFromDevice = async (): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      launchImageLibrary(
+        {
+          mediaType: 'photo',
+          includeBase64: true,
+          quality: 0.8, // IMPORTANT (UIDAI size)
+        },
+        response => {
+          if (response.didCancel) {
+            reject(new Error('User cancelled image selection'));
+            return;
+          }
+
+          if (response.errorCode) {
+            reject(new Error(response.errorMessage || 'Picker error'));
+            return;
+          }
+
+          const asset = response.assets?.[0];
+          if (!asset?.base64) {
+            reject(new Error('Base64 not available'));
+            return;
+          }
+
+          resolve(asset.base64); // ✅ RAW BASE64 (NO PREFIX)
+        },
+      );
+    });
   };
 
   /* ===================== UIDAI FACE MATCH ===================== */
@@ -102,23 +132,24 @@ const DashboardScreen = ({navigation}: {navigation: any}) => {
     }
   };
   const handleFaceMatch = async () => {
-    try {
-      // 🔐 These MUST come from backend / UIDAI service
-      const signedPhotoBase64 = 'BASE64_SIGNED_PHOTO_FROM_SERVER';
-      const signedDocumentBase64 = 'BASE64_SIGNED_DOCUMENT_FROM_SERVER';
+    if (faceMatchLock.current) return;
 
-      // const responseXml = await startLocalFaceMatch(
-      //   signedPhotoBase64,
-      //   signedDocumentBase64,
-      // );
-      const responseXml = await startLocalFaceMatch(
-        'RHVtbXlTaWduZWRQaG90b0Jhc2U2NFN0cmluZw==',
-        'RHVtbXlTaWduZWREb2N1bWVudENNUw==',
-      );
-      // UIDAI RD Service response (XML)
-      Alert.alert('Face Match Success', responseXml);
-    } catch (error: any) {
-      Alert.alert('Face Match Failed', error.message);
+    try {
+      faceMatchLock.current = true;
+      setFaceMatchLoading(true);
+
+      // 1️⃣ Pick photo from device
+      const photoBase64 = await pickPhotoFromDevice();
+
+      // 2️⃣ Call your FINAL verified flow
+      const responseXml = await verifyFace(photoBase64);
+
+      Alert.alert('UIDAI Response', responseXml);
+    } catch (e: any) {
+      Alert.alert('Face Match Failed', e.message || 'Unable to verify face');
+    } finally {
+      setFaceMatchLoading(false);
+      faceMatchLock.current = false;
     }
   };
   /* ===================== UI ===================== */
