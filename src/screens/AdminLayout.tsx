@@ -4,9 +4,9 @@ import {useNavigate, useLocation} from 'react-router-dom';
 /* ================== ROUTE → MENU MAP ================== */
 const routeToMenuMap: Record<string, {menu: string; sub?: string}> = {
   '/': {menu: 'Dashboard'},
-
-  '/packages/create': {menu: 'Packages', sub: 'PKG_CREATE'},
   '/packages/list': {menu: 'Packages', sub: 'PKG_QR'},
+  '/packages/create': {menu: 'Packages', sub: 'PKG_CREATE'},
+  '/ApplicationList': {menu: 'Students', sub: 'STUDENT_LIST'},
   '/packages/track': {menu: 'Packages', sub: 'PKG_TRACK'},
   '/packages/generate-qr': {menu: 'Packages', sub: 'PKG_QR'},
   '/packages/qr-list': {menu: 'Packages', sub: 'QR_GENERATE'},
@@ -131,7 +131,7 @@ const AdminLayout: React.FC<Props> = ({children}) => {
             onClick={() => goTo('/')}
           />
 
-          {/* PACKAGES */}
+          {/* PACKAGES 
           <NavDropdown
             label="Packages"
             active={activeMenu === 'Packages'}
@@ -162,7 +162,7 @@ const AdminLayout: React.FC<Props> = ({children}) => {
             ])}
           </NavDropdown>
 
-          {/* SCANS */}
+        
           <NavDropdown
             label="Scans"
             active={activeMenu === 'Scans'}
@@ -177,7 +177,6 @@ const AdminLayout: React.FC<Props> = ({children}) => {
             ])}
           </NavDropdown>
 
-          {/* MASTERS */}
           <NavDropdown
             label="Masters"
             active={activeMenu === 'Masters'}
@@ -190,7 +189,7 @@ const AdminLayout: React.FC<Props> = ({children}) => {
             ])}
           </NavDropdown>
 
-          {/* USERS */}
+        
           <NavDropdown
             label="Users & Roles"
             active={activeMenu === 'Users'}
@@ -202,14 +201,13 @@ const AdminLayout: React.FC<Props> = ({children}) => {
             ])}
           </NavDropdown>
 
-          {/* REPORTS */}
           <MenuButton
             label="Reports"
             active={activeMenu === 'Reports'}
             onClick={() => goTo('/reports')}
           />
 
-          {/* AUDIT */}
+        
           <NavDropdown
             label="Application Logs"
             active={activeMenu === 'Audit'}
@@ -231,15 +229,28 @@ const AdminLayout: React.FC<Props> = ({children}) => {
           </NavDropdown>
           {/* Import Export */}
           <NavDropdown
-            label="Import Export"
+            label="Applications"
+            active={activeMenu === 'Student'}
+            open={openSubMenu === 'Student'}
+            onToggle={() => toggleSubMenu('Student')}>
+            {renderSubMenu('Student', [
+              {
+                key: 'STUDENT_LIST',
+                label: 'Student Applications',
+                route: '/ApplicationList',
+              },
+            ])}
+          </NavDropdown>
+          <NavDropdown
+            label="Import Export Application"
             active={activeMenu === 'Import'}
             open={openSubMenu === 'Import'}
             onToggle={() => toggleSubMenu('Import')}>
             {renderSubMenu('Import', [
               {
                 key: 'IMPORT_OUTER',
-                label: 'Import Packages',
-                route: '/ImportPackages',
+                label: 'Import Applications',
+                route: '/ImportApplications',
               },
             ])}
           </NavDropdown>

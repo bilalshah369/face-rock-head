@@ -17,6 +17,8 @@ import GenerateQR from './src/screens/GenerateQR.web';
 import OuterPackageExcelImport from './src/screens/workspace/OuterPackageExcelImport';
 import GenerateQR_center from './src/screens/package/GenerateQR_center.web';
 import PrintQRPDF_center from './src/screens/package/PrintQRPDF_center.web';
+import StudentExcelImport from './src/screens/workspace/StudentExcelImport';
+import StudentApplicationsList from './src/screens/workspace/StudentApplicationsList';
 const TOKEN_KEY = 'nta_token';
 const ProtectedRoute = ({children}: any) => {
   const token = localStorage.getItem(TOKEN_KEY);
@@ -147,6 +149,22 @@ export default function App() {
         element={
           <ProtectedRoute>
             <OuterPackageExcelImport />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/ImportApplications"
+        element={
+          <ProtectedRoute>
+            <StudentExcelImport />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/ApplicationList"
+        element={
+          <ProtectedRoute>
+            <StudentApplicationsList />
           </ProtectedRoute>
         }
       />

@@ -9,8 +9,8 @@ import {useAppContext} from '../context/AppContext';
 const API_URL = API_BASE + '/scans/single';
 const TOKEN_KEY = 'token';
 export const syncScansToBackend = async () => {
-  const {isAutoSync} = useAppContext();
-  if (isAutoSync) {
+  //const {isAutoSync} = useAppContext();
+  if (true) {
     const net = await NetInfo.fetch();
     if (!net.isConnected) return;
     let latitude = null;
