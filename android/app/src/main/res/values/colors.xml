@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary_dark">#000000</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="md_theme_light_surface">#FFFBFE</color>
+    <color name="barcode_reticle_background">#99000000</color>
+    <color name="barcode_reticle_stroke">#ffffff</color>
+    <color name="qr_code_reader_square">@android:color/transparent</color>
+
+</resources>

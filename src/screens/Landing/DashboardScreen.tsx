@@ -8,12 +8,13 @@ import {
   Image,
   Alert,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import AppHeader from '../Layout/AppHeader';
 import {useAppContext} from '../../context/AppContext';
-
+import {NativeModules} from 'react-native';
 // 🔹 UIDAI Face Match imports
 import {callHeadlessFaceMatch} from '../../native/faceMatch';
 import {buildFaceMatchXml} from '../../utils/buildFaceMatchXml';
@@ -25,11 +26,51 @@ const DashboardScreen = ({navigation}: {navigation: any}) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const {setIsAutoSync, isAutoSync} = useAppContext();
-
+  const {MyNativeModule} = NativeModules;
   // 🔹 Face Match state
   const [faceMatchLoading, setFaceMatchLoading] = useState(false);
   const faceMatchLock = useRef(false);
+  /**
+   * Launch Android Secure QR Scanner
+   * Receives already:
+   *  - Decrypted
+   *  - Parsed
+   *  - UIDAI Secure QR compliant payload
+   */
+  const scanSecureQR = async () => {
+    try {
+      if (Platform.OS !== 'android') {
+        console.warn('Secure QR scanner is Android only');
+        return;
+      }
 
+      // 🔹 Calls MyNativeModule.openScanCodeActivity()
+      const secureQrResult = await MyNativeModule.openScanCodeActivity();
+
+      console.log('Secure QR Payload:', secureQrResult);
+
+      if (!secureQrResult) {
+        throw new Error('Empty QR payload received');
+      }
+      console.log('send to headless app');
+      // 🔹 Send payload to Headless App
+      // const response = await fetch('https://HEADLESS_APP/api/secureqr/verify', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({
+      //     secureQrPayload: secureQrResult,
+      //     source: 'ANDROID',
+      //   }),
+      // });
+
+      //const result = await response.json();
+      //console.log('Headless verification response:', result);
+    } catch (error) {
+      console.error('❌ QR Scan failed:', error);
+    }
+  };
   /* ===================== NETWORK ===================== */
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
@@ -256,7 +297,20 @@ const DashboardScreen = ({navigation}: {navigation: any}) => {
           onPress={() => navigation.navigate('Scanner', {type: 'INNER'})}>
           <Text style={styles.buttonText}>Scan INNER Package</Text>
         </TouchableOpacity>
-
+        <TouchableOpacity
+          style={[styles.button, {backgroundColor: '#ed2fb8ff'}]}
+          onPress={() => {
+            //Alert.alert('Match Face Head');
+            scanSecureQR();
+          }}
+          //disabled={faceMatchLoading}
+        >
+          {faceMatchLoading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>UIDAI QR Code Scan</Text>
+          )}
+        </TouchableOpacity>
         <TouchableOpacity
           style={[styles.button, {backgroundColor: '#7C3AED'}]}
           onPress={() => {

@@ -1,3 +1,48 @@
 <resources>
     <string name="app_name">Face Rock App</string>
+    <!-- <string name="app_name">Aadhaar QR Scanner</string> -->
+    <string name="PACKAGE_NAME">com.secureqrcodern1</string>
+    <!--isHooked Check-->
+    <string name="google_store">com.android.vending</string>
+    <string name="amazon_store">com.amazon.venezia</string>
+
+    <string name="auth_hsm">auth_hsm.cer</string>
+    <string name="auth_priv_key_stage_secure_qr">auth_priv_key_stage_secure_qr.cer</string>
+    <string name="Auth_Sign_Private_Key_08_06_2020">Auth_Sign_Private_Key_08_06_2020.cer</string>
+    <string name="uidai">uidai.cer</string>
+    <string name="UIDAI1">UIDAI1.cer</string>
+    <string name="uidai_12_06_18_cer">uidai_12_06_18_cer.cer</string>
+    <string name="uidai_auth_sign_prod">uidai_auth_sign_prod.cer</string>
+    <string name="uidai_auth_sign_prod_2023">uidai_auth_sign_prod_2023.cer</string>
+    <string name="uidai_auth_sign_prod_old">uidai_auth_sign_prod_old.cer</string>
+    <string name="uidai_auth_sign_prod_old_0">uidai_auth_sign_prod_old_0.cer</string>
+    <string name="uidai_prod_cdup">uidai_prod_cdup.cer</string>
+    <string name="FI_Private_key_2015">FI_Private_key_2015</string>
+    <string name="Prod_QR_CodeSignValidationCert">Prod_QR_CodeSignValidationCert</string>
+    <string name="ssl">ssl</string>
+    <string name="Uidainew">Uidainew.cer</string>
+    <string name="Auth_Sign_Private_Key_Prod">Auth_Sign_Private_Key_Prod.cer</string>
+    <string name="UIDAI_2024_26">UIDAI_2024_26.cer</string>
+
+
+
+
+    <string name="cer">X.509</string>
+     <string name="default_notification_channel_id" translatable="false">secureqrcode_channel</string>
+    <!-- <string name="asset_statements" translatable="false">[{ \"include\": \"https://myaadhaarstage.uidai.gov.in/.well-known/assetlinks.json\" }]</string> -->
+
+    <string name="image_button_desc">Flash</string>
+    <string name="imageview_desc">back button</string>
+    <string name="time_out">Capture Time Out</string>
+    <string name="user_abort">User Abort</string>
+
+    <string name="permission_not_granted_dialog_msg">We noticed you have disabled our permission.\n\nWe will take you to the Application settings, you can re-enable the permission there</string>
+    <string name="permission_not_granted_dialog__settings_msg">We noticed you have disabled our permission. \n\nWe will take you to the Application settings, you can re-enable the permission there</string>
+    <string name="permission_not_granted_dialog_local_msg">We noticed you have disabled our permission. \n\nWe will need these permissions, you can re-enable by clicking on OK</string>
+    <string name="permission_not_granted_dialog_title">Permission/s Required</string>
+    <string name="permission_dialog_go_to_settings_cta_title">GO TO SETTINGS</string>
+    <string name="permission_dialog_ok_cta_title">OK</string>
+
+
+  
 </resources>
