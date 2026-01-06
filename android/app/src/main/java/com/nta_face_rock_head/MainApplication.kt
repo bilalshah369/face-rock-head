@@ -16,7 +16,7 @@ import com.facebook.soloader.SoLoader
 
 import com.scottyab.rootbeer.RootBeer
 import com.nta_face_rock_head.qrcodescanner.crypto.RNCrypto
-//import com.nta_face_rock_head.qrcodescanner.scanner.RNScanUtil
+import com.nta_face_rock_head.qrcodescanner.scanner.RNScanUtil
 
 import com.nta_face_rock_head.qrcodescanner.MyReactPackage
 import com.nta_face_rock_head.facematch.FaceMatchPackage
@@ -31,7 +31,7 @@ class MainApplication : Application(), ReactApplication {
               // add(MyReactNativePackage())
               add(FaceMatchPackage()) 
               add(RNCrypto()) 
-              //add(RNScanUtil()) 
+              add(RNScanUtil()) 
               //add(MyAppPackage()) 
               add(MyReactPackage())
               add(LocalFaceMatchPackage())

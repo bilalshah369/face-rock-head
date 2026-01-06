@@ -3,4 +3,8 @@ plugins { id("com.facebook.react.settings") }
 extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
 rootProject.name = 'nta_tracking_app'
 include ':app'
+// ✅ ADD THIS FOR OPENJPEG
+include(":openJpeg")
+project(":openJpeg").projectDir =
+        new File(rootProject.projectDir, "openJpeg")
 includeBuild('../node_modules/@react-native/gradle-plugin')

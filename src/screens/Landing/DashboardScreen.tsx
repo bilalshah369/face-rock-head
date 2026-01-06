@@ -10,18 +10,30 @@ import {
   ActivityIndicator,
   Platform,
 } from 'react-native';
+import {DeviceEventEmitter} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import AppHeader from '../Layout/AppHeader';
 import {useAppContext} from '../../context/AppContext';
 import {NativeModules} from 'react-native';
+import RNScanUtil from '../../native/MyNativeModule';
+import SecureQRResultModal from './SecureQRResultModal';
+
 // 🔹 UIDAI Face Match imports
 import {callHeadlessFaceMatch} from '../../native/faceMatch';
 import {buildFaceMatchXml} from '../../utils/buildFaceMatchXml';
 import {parseFaceMatchResponse} from '../../utils/parseFaceMatchResponse';
 import {verifyFace} from '../../native/localFaceMatch';
 import {launchImageLibrary} from 'react-native-image-picker';
+import {scanData, j2kPng, validateHash} from '../../utils/scan/scanUtils';
 const DashboardScreen = ({navigation}: {navigation: any}) => {
+  const [qrModalVisible, setQrModalVisible] = useState(false);
+  const [qrResult, setQrResult] = useState<{
+    name?: string;
+    uid?: string;
+    photo?: string;
+    photoMimeType?: string;
+  }>({});
   const [isOnline, setIsOnline] = useState<boolean>(true);
   const [showMenu, setShowMenu] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
@@ -30,6 +42,27 @@ const DashboardScreen = ({navigation}: {navigation: any}) => {
   // 🔹 Face Match state
   const [faceMatchLoading, setFaceMatchLoading] = useState(false);
   const faceMatchLock = useRef(false);
+  useEffect(() => {
+    console.log('📡 Registering QR event listener');
+
+    const sub = DeviceEventEmitter.addListener('onQRCodeDecoded', payload => {
+      console.log('✅ JS RECEIVED QR PAYLOAD:', payload);
+
+      if (!payload) {
+        console.error('❌ Empty payload received');
+        return;
+      }
+
+      // 👉 THIS IS WHERE YOU CONTINUE FLOW
+      console.log('send to headless app');
+    });
+
+    return () => {
+      console.log('🧹 Removing QR event listener');
+      sub.remove();
+    };
+  }, []);
+
   /**
    * Launch Android Secure QR Scanner
    * Receives already:
@@ -37,40 +70,40 @@ const DashboardScreen = ({navigation}: {navigation: any}) => {
    *  - Parsed
    *  - UIDAI Secure QR compliant payload
    */
-  const scanSecureQR = async () => {
-    try {
-      if (Platform.OS !== 'android') {
-        console.warn('Secure QR scanner is Android only');
-        return;
-      }
+  // const scanSecureQR = async () => {
+  //   try {
+  //     if (Platform.OS !== 'android') {
+  //       console.warn('Secure QR scanner is Android only');
+  //       return;
+  //     }
 
-      // 🔹 Calls MyNativeModule.openScanCodeActivity()
-      const secureQrResult = await MyNativeModule.openScanCodeActivity();
+  //     // 🔹 Calls MyNativeModule.openScanCodeActivity()
+  //     const secureQrResult = await MyNativeModule.openScanCodeActivity();
 
-      console.log('Secure QR Payload:', secureQrResult);
+  //     console.log('Secure QR Payload:', secureQrResult);
 
-      if (!secureQrResult) {
-        throw new Error('Empty QR payload received');
-      }
-      console.log('send to headless app');
-      // 🔹 Send payload to Headless App
-      // const response = await fetch('https://HEADLESS_APP/api/secureqr/verify', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({
-      //     secureQrPayload: secureQrResult,
-      //     source: 'ANDROID',
-      //   }),
-      // });
+  //     if (!secureQrResult) {
+  //       throw new Error('Empty QR payload received');
+  //     }
+  //     console.log('send to headless app');
+  //     // 🔹 Send payload to Headless App
+  //     // const response = await fetch('https://HEADLESS_APP/api/secureqr/verify', {
+  //     //   method: 'POST',
+  //     //   headers: {
+  //     //     'Content-Type': 'application/json',
+  //     //   },
+  //     //   body: JSON.stringify({
+  //     //     secureQrPayload: secureQrResult,
+  //     //     source: 'ANDROID',
+  //     //   }),
+  //     // });
 
-      //const result = await response.json();
-      //console.log('Headless verification response:', result);
-    } catch (error) {
-      console.error('❌ QR Scan failed:', error);
-    }
-  };
+  //     //const result = await response.json();
+  //     //console.log('Headless verification response:', result);
+  //   } catch (error) {
+  //     console.error('❌ QR Scan failed:', error);
+  //   }
+  // };
   /* ===================== NETWORK ===================== */
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
@@ -82,6 +115,79 @@ const DashboardScreen = ({navigation}: {navigation: any}) => {
     });
     return () => unsubscribe();
   }, []);
+  const onScanSuccess = async (result: any): Promise<void> => {
+    try {
+      console.log('inside success', result);
+      let data: any = null;
+      data = await scanData(result);
+      //console.log('scanned data output', data);
+      console.log(data);
+      let imageData = await j2kPng(data.image);
+      console.log('Base64 PNG', data);
+      console.log(imageData);
+      setQrResult({
+        name: data.name,
+        uid: data.rollNumber,
+        photo: imageData,
+        //photoMimeType: data.photoMimeType, // 👈 important
+      });
+      // TODO: handle scan success logic here
+    } catch (error) {
+      // TODO: handle error here
+    }
+  };
+  const scanSecureQR = async () => {
+    if (Platform.OS !== 'android') {
+      console.warn('Secure QR scanner is Android only');
+      return;
+    }
+
+    try {
+      console.log('📷 Opening Secure QR Scanner');
+
+      const payload = await MyNativeModule.openScanCodeActivity();
+
+      console.log('✅ JS RECEIVED QR PAYLOAD:', payload);
+
+      if (!payload) {
+        throw new Error('Empty QR payload received');
+      }
+      onScanSuccess(payload);
+
+      let data = null;
+      //data = await scanData(result);
+      //here
+      //const result = await RNScanUtil.decodeSecureQR(payload);
+
+      // debugger;
+      // const res1 = await RNScanUtil.convertPngToJpegFormat(result.photoBase64);
+      // console.log('Image Result');
+      // console.log(res1);
+      // // 🔹 Convert Aadhaar JP2 photo → PNG Base64
+      // let photoBase64: string | undefined;
+      // if (payload.photoJp2) {
+      //   photoBase64 = await MyNativeModule.convertPngToJpegFormat(
+      //     payload.photoJp2,
+      //   );
+      // }
+
+      // 🔹 Store result
+      //console.log(result);
+      // setQrResult({
+      //   name: result.rollNumber,
+      //   uid: result.rollNumber,
+      //   photo: result.photoBase64,
+      //   photoMimeType: result.photoMimeType, // 👈 important
+      // });
+
+      // 🔹 Show popup
+      setQrModalVisible(true);
+      console.log('send to headless app');
+    } catch (e: any) {
+      console.error('❌ QR Scan failed:', e?.message || e);
+      Alert.alert('QR Scan Failed', e?.message || 'User cancelled scan');
+    }
+  };
 
   /* ===================== AUTO SYNC ===================== */
   const toggleAutoSync = () => {
@@ -180,10 +286,10 @@ const DashboardScreen = ({navigation}: {navigation: any}) => {
       setFaceMatchLoading(true);
 
       // 1️⃣ Pick photo from device
-      const photoBase64 = await pickPhotoFromDevice();
-
+      // const photoBase64 = await pickPhotoFromDevice();
+      debugger;
       // 2️⃣ Call your FINAL verified flow
-      const responseXml = await verifyFace(photoBase64);
+      const responseXml = await verifyFace(qrResult.photo ?? '');
 
       Alert.alert('UIDAI Response', responseXml);
     } catch (e: any) {
@@ -286,7 +392,7 @@ const DashboardScreen = ({navigation}: {navigation: any}) => {
         </View>
 
         {/* ACTIONS */}
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.button}
           onPress={() => navigation.navigate('Scanner', {type: 'OUTER'})}>
           <Text style={styles.buttonText}>Scan OUTER Package</Text>
@@ -296,7 +402,7 @@ const DashboardScreen = ({navigation}: {navigation: any}) => {
           style={[styles.button, {backgroundColor: '#059669'}]}
           onPress={() => navigation.navigate('Scanner', {type: 'INNER'})}>
           <Text style={styles.buttonText}>Scan INNER Package</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <TouchableOpacity
           style={[styles.button, {backgroundColor: '#ed2fb8ff'}]}
           onPress={() => {
@@ -329,6 +435,14 @@ const DashboardScreen = ({navigation}: {navigation: any}) => {
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
       </View>
+      <SecureQRResultModal
+        visible={qrModalVisible}
+        onClose={() => setQrModalVisible(false)}
+        photoBase64={qrResult.photo}
+        photoMimeType={qrResult.photoMimeType}
+        name={qrResult.name}
+        uid={qrResult.uid}
+      />
     </>
   );
 };

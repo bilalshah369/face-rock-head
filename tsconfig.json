@@ -1,15 +1,37 @@
+// // {
+// //   "extends": "@react-native/typescript-config/tsconfig.json"
+// // }
 // {
-//   "extends": "@react-native/typescript-config/tsconfig.json"
+//   "compilerOptions": {
+//     "target": "es2019",
+//     "module": "commonjs",
+//     "lib": ["es2019", "dom"],
+//     "jsx": "react-jsx",
+//     "strict": true,
+//     "esModuleInterop": true,
+//     "moduleResolution": "node",
+//     "skipLibCheck": true
+//   }
 // }
 {
   "compilerOptions": {
-    "target": "es2019",
-    "module": "commonjs",
-    "lib": ["es2019", "dom"],
-    "jsx": "react-jsx",
+    "target": "esnext",
+    "module": "esnext",
+
+    "lib": ["es2019"],
+    "jsx": "react-native",
+
     "strict": true,
     "esModuleInterop": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+
     "moduleResolution": "node",
-    "skipLibCheck": true
-  }
+
+    "sourceMap": true,
+    "inlineSources": true,
+
+    "types": ["react", "react-native"]
+  },
+  "include": ["src"]
 }

@@ -3,8 +3,6 @@ package com.nta_face_rock_head.qrcodescanner
 import android.app.Activity
 import android.content.Intent
 import com.facebook.react.bridge.*
-import com.facebook.react.modules.core.DeviceEventManagerModule
-import com.nta_face_rock_head.qrcodescanner.ScanCodeActivity
 
 class MyNativeModule(
     reactContext: ReactApplicationContext
@@ -17,19 +15,17 @@ class MyNativeModule(
         reactContext.addActivityEventListener(this)
     }
 
-    override fun getName(): String {
-        return "MyNativeModule"
-    }
+    override fun getName(): String = "MyNativeModule"
 
     /**
      * JS → Native
-     * Launch Secure QR Scanner
+     * Launch Secure QR Scanner (PROMISE-BASED)
      */
     @ReactMethod
     fun openScanCodeActivity(promise: Promise) {
         val activity = currentActivity
         if (activity == null) {
-            promise.reject("NO_ACTIVITY", "Activity doesn't exist")
+            promise.reject("NO_ACTIVITY", "Current activity is null")
             return
         }
 
@@ -39,54 +35,34 @@ class MyNativeModule(
     }
 
     /**
-     * Result from ScanCodeActivity
+     * Receive result from ScanCodeActivity
      */
-//    override fun onActivityResult(
-//        activity: Activity?,
-//        requestCode: Int,
-//        resultCode: Int,
-//        data: Intent?
-//    ): Boolean {
-//        if (requestCode == SCAN_REQUEST_CODE) {
-//            if (resultCode == Activity.RESULT_OK) {
-//                val decryptedResult = data?.getStringExtra("SCAN_RESULT")
-//                scanPromise?.resolve(decryptedResult)
-//            } else {
-//                scanPromise?.reject("SCAN_CANCELLED", "User cancelled scan")
-//            }
-//            scanPromise = null
-//            return true
-//        }
-//        return false
-//    }
     override fun onActivityResult(
-    activity: Activity?,
-    requestCode: Int,
-    resultCode: Int,
-    data: Intent?
-) {
-    if (requestCode == SCAN_REQUEST_CODE) {
-        if (resultCode == Activity.RESULT_OK) {
-            val decryptedResult = data?.getStringExtra("SCAN_RESULT")
-            scanPromise?.resolve(decryptedResult)
-        } else {
-            scanPromise?.reject("SCAN_CANCELLED", "User cancelled scan")
+        activity: Activity?,
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
+        if (requestCode != SCAN_REQUEST_CODE) return
+
+        val payload = data?.getStringExtra(Constants.BARCODE_RESULT)
+
+        when {
+            resultCode == Activity.RESULT_OK && !payload.isNullOrEmpty() -> {
+                scanPromise?.resolve(payload)
+            }
+            resultCode == Constants.RESULT_INVALID -> {
+                scanPromise?.reject("INVALID_QR", "Invalid QR Code")
+            }
+            else -> {
+                scanPromise?.reject("SCAN_CANCELLED", "User cancelled scan")
+            }
         }
+
         scanPromise = null
     }
-}
-
 
     override fun onNewIntent(intent: Intent?) {
         // Not required
-    }
-
-    /**
-     * Optional: Native → JS event emitter (keep if needed)
-     */
-    private fun sendEvent(eventName: String, eventData: String) {
-        reactApplicationContext
-            .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
-            .emit(eventName, eventData)
     }
 }

@@ -12,13 +12,13 @@ import android.net.NetworkCapabilities
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
-import com.nta_face_rock_head.qrcodescanner.BuildConfig
+//import com.nta_face_rock_head.qrcodescanner.BuildConfig
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
-
+import com.nta_face_rock_head.BuildConfig
 //TODO Change Object to File
 object Utils {
 

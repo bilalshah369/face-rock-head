@@ -11,8 +11,10 @@ public class LibraryInitializer {
         if (!isInitialized) {
             try {
                 System.loadLibrary("openjpeg");
+                 android.util.Log.d("OPENJPEG", "libopenjpeg loaded");
                 isInitialized = true;
             } catch (Throwable t) {
+                 android.util.Log.e("OPENJPEG", "Failed to load", t);
                 throw new ExceptionInInitializerError("OpenJPEG Java Decoder: probably impossible to find the C library");
             }
         }

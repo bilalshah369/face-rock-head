@@ -8,7 +8,7 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-
+import com.nta_face_rock_head.R
 
 class PermissionHelper(private val activity: Activity) {
 

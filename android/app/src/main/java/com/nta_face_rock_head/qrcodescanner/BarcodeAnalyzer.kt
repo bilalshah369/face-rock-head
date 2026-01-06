@@ -9,7 +9,7 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 
 class BarcodeAnalyzer(
-        private val listener: BarcodeListener,
+    private val listener: BarcodeListener,
 ) : ImageAnalysis.Analyzer {
 
     private val options = BarcodeScannerOptions.Builder()
@@ -18,33 +18,41 @@ class BarcodeAnalyzer(
 
     private val scanner = BarcodeScanning.getClient(options)
 
-    @SuppressLint("UnsafeExperimentalUsageError", "UnsafeOptInUsageError")
+    // 🔒 VERY IMPORTANT: prevent multiple callbacks
+    private var scanned = false
+
+    @SuppressLint("UnsafeOptInUsageError")
     override fun analyze(imageProxy: ImageProxy) {
-        val mediaImage = imageProxy.image
-        if (mediaImage != null) {
-
-            val image: InputImage =
-                InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
-
-            // Pass image to the scanner and have it do its thing
-            scanner.process(image)
-                .addOnSuccessListener { barcodes ->
-                    // Task completed successfully
-                    barcodes.firstOrNull().let { barcode ->
-                        val rawValue = barcode?.rawValue
-                        rawValue?.let {
-                            listener.setBarCodeValue(it)
-                        }
-                    }
-                    imageProxy.close()
-                }
-                .addOnFailureListener {
-                    // You should really do something about Exceptions
-                    listener.setBarCodeValue("")
-                    imageProxy.close()
-                }
+        if (scanned) {
+            imageProxy.close()
+            return
         }
+
+        val mediaImage = imageProxy.image ?: run {
+            imageProxy.close()
+            return
+        }
+
+        val image = InputImage.fromMediaImage(
+            mediaImage,
+            imageProxy.imageInfo.rotationDegrees
+        )
+
+        scanner.process(image)
+            .addOnSuccessListener { barcodes ->
+                val barcode = barcodes.firstOrNull()
+                val rawValue = barcode?.rawValue
+
+                if (!rawValue.isNullOrEmpty()) {
+                    scanned = true               // ✅ STOP further scans
+                    listener.setBarCodeValue(rawValue) // ✅ RETURN VALUE
+                }
+
+                imageProxy.close()
+            }
+            .addOnFailureListener {
+                // ❌ DO NOTHING HERE (DO NOT SEND EMPTY VALUE)
+                imageProxy.close()
+            }
     }
-
-
 }
