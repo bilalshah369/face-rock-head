@@ -522,6 +522,7 @@ export const getAadhaarDataFromBytes = async (data, rawData) => {
     }
 
     if (Platform.OS != 'ios') {
+      debugger;
       let completeByteArrayExcludeSignature = Array.from(
         data.slice(0, data.length - 256),
       ).join(',');

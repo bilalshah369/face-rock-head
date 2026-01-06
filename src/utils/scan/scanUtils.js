@@ -11,7 +11,6 @@ const RNCrypto = NativeModules.RNCrypto;
 const RNTUtility = NativeModules.RNTUtility;
 
 export const scanData = async data => {
-  console.log('datttta ', data);
   if (data.startsWith('<QPDB')) {
     let xmlJson = await parseXML(data);
     xmlJson = xmlJson.QPDB.$;
