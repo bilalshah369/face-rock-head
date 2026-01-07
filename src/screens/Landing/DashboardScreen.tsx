@@ -316,10 +316,10 @@ const DashboardScreen = ({navigation}: {navigation: any}) => {
               }}
               style={styles.menuLogo}
             />
-            <Text style={styles.appName}>Package Tracker</Text>
+            <Text style={styles.appName}>Face Recognition</Text>
           </View>
 
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.menuButton}
             onPress={() => {
               setShowMenu(false);
@@ -335,7 +335,7 @@ const DashboardScreen = ({navigation}: {navigation: any}) => {
               navigation.navigate('Scanner', {type: 'INNER'});
             }}>
             <Text style={styles.menuButtonText}>📦 Scan INNER Package</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           <TouchableOpacity
             style={styles.menuButton}
@@ -360,7 +360,7 @@ const DashboardScreen = ({navigation}: {navigation: any}) => {
 
       {/* HEADER */}
       <AppHeader
-        title="Dashboard"
+        title="Face Recognition App"
         onMenuPress={() => setShowMenu(true)}
         onProfilePress={() => setShowProfile(true)}
       />

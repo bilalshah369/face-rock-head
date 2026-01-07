@@ -69,10 +69,8 @@ const LoginScreen = ({navigation}: {navigation: any}) => {
       />
       {/* Card */}
       <View style={styles.card}>
-        <Text style={styles.title}>Package Tracking System</Text>
-        <Text style={styles.subtitle}>
-          Sign in to continue scanning packages
-        </Text>
+        <Text style={styles.title}> NTA Face Recognition</Text>
+        <Text style={styles.subtitle}>Sign in to continue scanning Faces</Text>
 
         <TextInput
           style={styles.input}
@@ -105,7 +103,11 @@ const LoginScreen = ({navigation}: {navigation: any}) => {
       </View>
 
       {/* Footer */}
-      <Text style={styles.footer}>© 2025 Package Tracking System</Text>
+      <div className="mt-6 text-center text-xs text-gray-500">
+        © {new Date().getFullYear()} National Testing Agency
+        <br />
+        Authorized Personnel Only
+      </div>
     </View>
   );
 };

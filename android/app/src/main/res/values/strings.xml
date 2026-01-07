@@ -5,7 +5,7 @@
     <!--isHooked Check-->
     <string name="google_store">com.android.vending</string>
     <string name="amazon_store">com.amazon.venezia</string>
-
+    <string name="nta_store">qr-signing-public-cert.cer</string>
     <string name="auth_hsm">auth_hsm.cer</string>
     <string name="auth_priv_key_stage_secure_qr">auth_priv_key_stage_secure_qr.cer</string>
     <string name="Auth_Sign_Private_Key_08_06_2020">Auth_Sign_Private_Key_08_06_2020.cer</string>

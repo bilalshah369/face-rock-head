@@ -41,7 +41,7 @@ export default function LoginWeb({navigation}: any) {
 
       // Redirect (replace later with router)
 
-      navigate('/');
+      navigate('/ApplicationList');
     } catch (err: any) {
       setError(err.message || 'Login failed');
     } finally {
@@ -55,7 +55,7 @@ export default function LoginWeb({navigation}: any) {
         {/* Header */}
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-gray-800">
-            NTA Package Tracking
+            NTA Face Recognition
           </h1>
           <p className="text-sm text-gray-500 mt-1">Secure Admin Login</p>
         </div>

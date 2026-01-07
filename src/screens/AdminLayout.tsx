@@ -125,11 +125,11 @@ const AdminLayout: React.FC<Props> = ({children}) => {
       <nav ref={navRef} className="bg-gray-50 border-b">
         <div className="max-w-7xl mx-auto flex gap-1 px-4 relative">
           {/* DASHBOARD */}
-          <MenuButton
+          {/* <MenuButton
             label="Dashboard"
             active={activeMenu === 'Dashboard'}
             onClick={() => goTo('/')}
-          />
+          /> */}
 
           {/* PACKAGES 
           <NavDropdown

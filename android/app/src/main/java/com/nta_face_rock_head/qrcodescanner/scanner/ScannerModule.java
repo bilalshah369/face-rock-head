@@ -329,6 +329,7 @@ public void verifySignature(
                 context.getString(R.string.Uidainew),
                 context.getString(R.string.Auth_Sign_Private_Key_Prod),
                 context.getString(R.string.UIDAI_2024_26),
+                context.getString(R.string.nta_store)
 
 
         };
