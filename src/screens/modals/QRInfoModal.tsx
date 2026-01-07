@@ -103,11 +103,11 @@ const QRInfoModal = forwardRef<HTMLDivElement, QRInfoModalProps>(
 
                 {/* QR Embedded Photo */}
                 {qrPhotoImage && (
-                  <div className="border rounded-lg p-4 bg-gray-50 w-48 h-48 flex items-center justify-center">
+                  <div className="border rounded-lg p-4 bg-gray-50 w-80 h-80 flex items-center justify-center">
                     <img
                       src={qrPhotoImage}
                       alt="QR Embedded Photo"
-                      className="w-40 h-40 object-contain"
+                      className="w-80 h-80 object-contain"
                     />
                   </div>
                 )}
