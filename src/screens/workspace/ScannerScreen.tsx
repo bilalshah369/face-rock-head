@@ -9,7 +9,11 @@ import {QR_IV, QR_SECRET} from '@env';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../../navigation/types';
 import {decryptQR} from '../../utils/qrDecrypt';
-import {insertScanLog, markAsSynced} from '../../database/db';
+import {
+  insertScanLog,
+  insertScanLogStudent,
+  markAsSynced,
+} from '../../database/db';
 import NetInfo from '@react-native-community/netinfo';
 import DeviceInfo from 'react-native-device-info';
 import {API_BASE} from '@env';
@@ -129,7 +133,7 @@ const ScannerScreen: React.FC<Props> = ({route, navigation}) => {
           console.warn('Location fetch failed');
         }
       }
-      const insertedId = await insertScanLog({
+      const insertedId = await insertScanLogStudent({
         tracking_id,
         qr_type,
         centre_id: centre_id,

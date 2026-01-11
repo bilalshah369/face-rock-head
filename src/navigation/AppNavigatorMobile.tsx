@@ -6,6 +6,7 @@ import DashboardScreen from '../screens/Landing/DashboardScreen';
 import ScannerScreen from '../screens/workspace/ScannerScreen';
 import {RootStackParamList} from './types';
 import ScanHistoryScreen from '../screens/workspace/ScanHistoryScreen';
+import RoleSelectionScreen from '../screens/workspace/RoleSelectionScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -53,6 +54,12 @@ const AppNavigator = ({
         name="ScanHistoryScreen"
         component={ScanHistoryScreen}
         options={{title: 'Scan History'}}
+      />
+      <Stack.Screen
+        name="RoleSelection"
+        component={RoleSelectionScreen}
+        //options={{title: 'Manual Entry'}}
+        options={{headerShown: false}}
       />
     </Stack.Navigator>
   );

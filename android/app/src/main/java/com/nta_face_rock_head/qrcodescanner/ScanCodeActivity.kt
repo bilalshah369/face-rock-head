@@ -69,7 +69,10 @@ class ScanCodeActivity : AppCompatActivity(), BarcodeListener, CoroutineScope {
 
         binding.lblTitle.text = intent.getStringExtra(TITLE)
         binding.lblSubTitle.text = intent.getStringExtra(MSG)
-
+binding.btnBack.setOnClickListener {
+    setResult(Activity.RESULT_CANCELED, Intent())
+    finish()
+}
         onBackClicked()
         askForPermissions()
 

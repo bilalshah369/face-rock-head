@@ -8,34 +8,26 @@ import {getCurrentLocation} from '../utils/location';
 import {useAppContext} from '../context/AppContext';
 const API_URL = API_BASE + '/scans/single';
 const TOKEN_KEY = 'token';
+//let isSyncing = false;
 export const syncScansToBackend = async () => {
-  //const {isAutoSync} = useAppContext();
-  if (true) {
+  debugger;
+  // if (isSyncing) {
+  //   console.log('🔒 Sync already running, skipping');
+  //   return;
+  // }
+
+  //isSyncing = true;
+
+  try {
     const net = await NetInfo.fetch();
     if (!net.isConnected) return;
-    let latitude = null;
-    let longitude = null;
+
     const token = await AsyncStorage.getItem(TOKEN_KEY);
     if (!token) return;
 
     const scans = await getPendingScans();
     if (scans.length === 0) return;
-    const userData = await AsyncStorage.getItem('user');
-    let user = null;
-    if (userData) {
-      user = JSON.parse(userData);
-    }
 
-    const hasPermission = await hasLocationPermission();
-    if (hasPermission) {
-      try {
-        const location = await getCurrentLocation();
-        latitude = location.latitude;
-        longitude = location.longitude;
-      } catch (err) {
-        console.warn('Location fetch failed');
-      }
-    }
     for (const scan of scans) {
       try {
         const res = await fetch(API_URL, {
@@ -47,6 +39,8 @@ export const syncScansToBackend = async () => {
           body: JSON.stringify({
             tracking_id: scan.tracking_id,
             qr_type: scan.qr_type,
+            name: scan.name,
+            face_status: scan.face_status,
             scan_datetime: scan.scan_datetime,
             centre_id: scan.centre_id,
             scan_mode: scan.scan_mode,
@@ -54,8 +48,8 @@ export const syncScansToBackend = async () => {
             remarks: scan.remarks,
             scanned_by: scan.scanned_by,
             scanned_phone: scan.phone_number,
-            latitude: latitude,
-            longitude: longitude,
+            latitude: scan.latitude,
+            longitude: scan.longitude,
             created_by: scan.scanned_by,
           }),
         });
@@ -67,8 +61,11 @@ export const syncScansToBackend = async () => {
         console.warn('Scan sync failed', scan.scan_id);
       }
     }
+  } finally {
+    //isSyncing = false;
   }
 };
+
 export const syncSingleScan = async (scan: any) => {
   const token = await AsyncStorage.getItem('auth_token');
   let latitude = null;

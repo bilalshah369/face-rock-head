@@ -10,4 +10,6 @@ export type RootStackParamList = {
   Result: undefined;
   Splash: undefined;
   Permissions: undefined;
+  ManualEntry: undefined;
+  RoleSelection: undefined;
 };

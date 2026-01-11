@@ -12,7 +12,8 @@ const routeToMenuMap: Record<string, {menu: string; sub?: string}> = {
   '/packages/qr-list': {menu: 'Packages', sub: 'QR_GENERATE'},
   '/packages/print-qr-pdf': {menu: 'Packages', sub: 'print-qr-pdf'},
   '/packages/scan-logs': {menu: 'Scans', sub: 'SCAN_LOGS'},
-
+  '/packages/scan-activity': {menu: 'Scans', sub: 'SCAN_LOGS_ALL'},
+  '/packages/scan-route': {menu: 'Scans', sub: 'SCAN_ROUTE_ALL'},
   '/masters/states': {menu: 'Masters', sub: 'STATE'},
   '/masters/cities': {menu: 'Masters', sub: 'CITY'},
   '/masters/centres': {menu: 'Masters', sub: 'CENTRE'},
@@ -239,6 +240,39 @@ const AdminLayout: React.FC<Props> = ({children}) => {
                 label: 'Student Applications',
                 route: '/ApplicationList',
               },
+            ])}
+          </NavDropdown>
+          <NavDropdown
+            label="Scans"
+            active={activeMenu === 'Scans'}
+            open={openSubMenu === 'Scans'}
+            onToggle={() => toggleSubMenu('Scans')}>
+            {renderSubMenu('Scans', [
+              {
+                key: 'SCAN_LOGS',
+                label: 'Scan Logs',
+                route: '/packages/scan-logs',
+              },
+              {
+                key: 'SCAN_LOGS_ALL',
+                label: 'Scan Activity',
+                route: '/packages/scan-activity',
+              },
+              {
+                key: 'SCAN_ROUTE_ALL',
+                label: 'Scan Geographic Boundary (meter)',
+                route: '/packages/scan-route',
+              },
+            ])}
+          </NavDropdown>
+          <NavDropdown
+            label="Users & Roles"
+            active={activeMenu === 'Users'}
+            open={openSubMenu === 'Users'}
+            onToggle={() => toggleSubMenu('Users')}>
+            {renderSubMenu('Users', [
+              {key: 'USERS', label: 'Users', route: '/users'},
+              {key: 'ROLES', label: 'Roles', route: '/roles'},
             ])}
           </NavDropdown>
           <NavDropdown

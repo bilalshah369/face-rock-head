@@ -2,7 +2,7 @@ import {getDB} from './db';
 
 export const initDB = async () => {
   const db = await getDB();
-  //await db.executeSql(`DROP TABLE IF EXISTS scan_logs`);ffff
+  //await db.executeSql(`DROP TABLE IF EXISTS scan_logs`);
   console.log('Initializing database...');
   await db.executeSql(`
   CREATE TABLE IF NOT EXISTS scan_logs (
@@ -10,7 +10,9 @@ export const initDB = async () => {
 
     tracking_id TEXT NOT NULL,
     qr_type TEXT CHECK (qr_type IN ('OUTER', 'INNER')),
-centre_id integer,
+    centre_id integer,
+    name TEXT,
+
     scanned_by INTEGER,
     scanned_phone TEXT,
 
@@ -23,11 +25,18 @@ centre_id integer,
     device_id TEXT,
 
     remarks TEXT,
+    face_status TEXT,
 
     created_on TEXT DEFAULT (datetime('now')),
     created_by INTEGER,
 
     synced INTEGER DEFAULT 0
+    
   );
 `);
+  // 🔴 REQUIRED FOR UPSERT
+  await db.executeSql(`
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_scan_logs_tracking_id
+    ON scan_logs(tracking_id);
+  `);
 };
