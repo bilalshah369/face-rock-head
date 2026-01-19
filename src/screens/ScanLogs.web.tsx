@@ -7,6 +7,7 @@ import {API_BASE} from '@env';
 import ZigZagScanView from './ZigZagScanView';
 import JourneyScanView from './JourneyScanView.web';
 import PackageQRTracking from '../Map/PackageQRTracking';
+import MultiSelectDropdown from './modals/MultiSelectDropdown';
 const TOKEN_KEY = 'nta_token';
 
 interface PackageItem {
@@ -32,6 +33,7 @@ interface ScanLog {
 
 export default function ScanLogs({navigation}: any) {
   const [packages, setPackages] = useState<PackageItem[]>([]);
+  const [selectedPackage, setSelectedPackage] = useState<any>();
   const [selectedTrackingId, setSelectedTrackingId] = useState('');
   const [trackingInput, setTrackingInput] = useState('');
   const [scanLogs, setScanLogs] = useState<ScanLog[]>([]);
@@ -89,8 +91,24 @@ export default function ScanLogs({navigation}: any) {
         setLoading(false);
       }
     };
+    const fetchPackage = async () => {
+      try {
+        let url = `${API_BASE}/packages?page=${1}&limit=${10}`;
+        if (selectedTrackingId) {
+          url += `&tracking_id=${encodeURIComponent(selectedTrackingId)}`;
+        }
+        const res = await fetch(`${url}`, {
+          headers: {Authorization: `Bearer ${token}`},
+        });
+        const json = await res.json();
+        setSelectedPackage(json.data[0]);
+      } catch (err) {
+        console.error('Failed to load packages', err);
+      }
+    };
 
     fetchScanLogs();
+    fetchPackage();
   }, [selectedTrackingId]);
 
   return (
@@ -105,7 +123,24 @@ export default function ScanLogs({navigation}: any) {
               <label className="block text-xs font-medium text-gray-600 mb-1">
                 Select Package
               </label>
-              <select
+              <MultiSelectDropdown
+                multiple={false}
+                placeholder="Select Package"
+                // disabled={editMode}
+                items={packages.map(c => ({
+                  label: `${c.tracking_id} — ${c.centre_name}`,
+                  value: String(c.tracking_id),
+                }))}
+                selected={
+                  selectedTrackingId ? [String(selectedTrackingId)] : []
+                }
+                onChange={async (selected: string[]) => {
+                  // single-select → take first value
+                  setSelectedTrackingId(selected[0] ?? '');
+                  setTrackingInput('');
+                }}
+              />
+              {/* <select
                 className="border rounded px-2 py-1.5 w-64 text-xs"
                 value={selectedTrackingId}
                 onChange={e => {
@@ -118,7 +153,7 @@ export default function ScanLogs({navigation}: any) {
                     {pkg.tracking_id} — {pkg.centre_name}
                   </option>
                 ))}
-              </select>
+              </select> */}
             </div>
 
             {/* Manual Search */}
@@ -184,10 +219,74 @@ export default function ScanLogs({navigation}: any) {
         </div>
 
         {/* ================= SUMMARY ================= */}
-        {selectedTrackingId && (
-          <div className="bg-white border rounded px-3 py-2 text-sm">
-            <span className="font-medium">Tracking ID:</span>{' '}
-            {selectedTrackingId}
+        {selectedTrackingId && selectedPackage?.qr_image_url && (
+          <div className="bg-white border rounded px-4 py-3 text-sm flex gap-4 items-center">
+            {/* LEFT : Tracking Info */}
+            <div className="flex-1 text-xs">
+              {/* HEADER */}
+              <div className="flex justify-between items-center mb-1">
+                <div className="font-semibold text-gray-800">
+                  {/* {selectedPackage.tracking_id} */}
+                  <Info
+                    label="Tracking ID"
+                    value={selectedPackage.tracking_id}
+                  />
+                </div>
+              </div>
+
+              {/* META GRID */}
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[11px]">
+                <Info label="Centre" value={selectedPackage.centre_name} />
+                <Info label="Centre Code" value={selectedPackage.centre_code} />
+                <Info
+                  label="Dispatch"
+                  value={
+                    selectedPackage.dispatch_datetime
+                      ? new Date(
+                          selectedPackage.dispatch_datetime,
+                        ).toLocaleString()
+                      : '-'
+                  }
+                />
+                <Info
+                  label="Status"
+                  value={
+                    <span className="font-semibold text-gray-700">
+                      {selectedPackage.status}
+                    </span>
+                  }
+                />
+              </div>
+
+              {/* PAYLOAD */}
+              {/* <div className="mt-2">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-[10px] font-medium text-gray-500">
+                    Encrypted Payload
+                  </span>
+                  <button
+                    onClick={() =>
+                      navigator.clipboard.writeText(
+                        selectedPackage.encrypted_payload,
+                      )
+                    }
+                    className="text-[10px] underline text-gray-500 hover:text-black">
+                    Copy
+                  </button>
+                </div>
+
+                <div className="bg-gray-100 border rounded p-2 text-[10px] font-mono text-gray-800 break-all max-h-24 overflow-auto">
+                  {selectedPackage.encrypted_payload}
+                </div>
+              </div> */}
+            </div>
+
+            {/* RIGHT : QR IMAGE */}
+            <img
+              src={selectedPackage.qr_image_url}
+              alt="Tracking QR"
+              className="w-24 h-24 border rounded bg-white"
+            />
           </div>
         )}
 
@@ -212,9 +311,12 @@ export default function ScanLogs({navigation}: any) {
         {design === 'zigzag' && (
           <ZigZagScanView trackingId={selectedTrackingId} />
         )}
-        <PackageQRTracking trackingId={selectedTrackingId} />
+        {selectedTrackingId && (
+          <PackageQRTracking trackingId={selectedTrackingId} />
+        )}
+
         {/* ================= TABLE ================= */}
-        {!loading && scanLogs.length > 0 && (
+        {/* {!loading && scanLogs.length > 0 && (
           <div className="bg-white border rounded overflow-x-auto">
             <div className="px-3 py-2 border-b text-sm font-medium text-gray-700">
               Scan Logs (Detailed)
@@ -253,8 +355,16 @@ export default function ScanLogs({navigation}: any) {
               </tbody>
             </table>
           </div>
-        )}
+        )} */}
       </div>
     </AdminLayout>
   );
 }
+const Info = ({label, value}: {label: string; value: React.ReactNode}) => (
+  <div>
+    <div className="text-[10px] text-gray-500 uppercase tracking-wide">
+      {label}
+    </div>
+    <div className="text-gray-800">{value}</div>
+  </div>
+);

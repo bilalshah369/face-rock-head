@@ -12,4 +12,5 @@ export type RootStackParamList = {
   Permissions: undefined;
   ManualEntry: undefined;
   RoleSelection: undefined;
+  ApplicationList: undefined;
 };

@@ -7,6 +7,8 @@ import AdminDashboard from './src/screens/AdminDashboard.web';
 import PackagesList from './src/screens/PackagesList.web';
 import PackagesTracking from './src/screens/PackagesTracking.web';
 import ScanLogs from './src/screens/ScanLogs.web';
+import ScanHistoryTable from './src/screens/workspace/ScanHistoryTable';
+import ScanRoutePreviewWithHistory from './src/screens/workspace/ScanRoutePreviewWithHistory';
 import UserManagement from './src/screens/UserManagement.web';
 import RolesMaster from './src/screens/RolesMaster.web';
 import StatesMaster from './src/screens/StatesMaster.web';
@@ -35,7 +37,8 @@ export default function App() {
         path="/"
         element={
           <ProtectedRoute>
-            <AdminDashboard />
+            {/* <AdminDashboard /> */}
+            <StudentApplicationsList />
           </ProtectedRoute>
         }
       />
@@ -90,7 +93,22 @@ export default function App() {
           </ProtectedRoute>
         }
       />
-
+      <Route
+        path="/packages/scan-activity"
+        element={
+          <ProtectedRoute>
+            <ScanHistoryTable />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/packages/scan-route"
+        element={
+          <ProtectedRoute>
+            <ScanRoutePreviewWithHistory />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/users"
         element={
